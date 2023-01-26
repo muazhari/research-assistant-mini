@@ -88,7 +88,7 @@ passage_search_request = {
     "query": query,
     "granularity": granularity,
     "window_sizes": window_sizes,
-    "percentage": percentage
+    "percentage": percentage,
     "open_ai_api_key": open_ai_api_key
 }
 
