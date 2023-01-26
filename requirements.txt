@@ -1,0 +1,8 @@
+farm_haystack
+more_itertools
+pdfkit
+pdfrw
+PyVirtualDisplay
+streamlit
+txtai
+txtmarker
