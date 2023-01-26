@@ -20,7 +20,7 @@ st.subheader("Configurations")
 
 open_ai_api_key = st.text_input(
     label="Enter an OpenAI API key.",
-    value="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"
+    value=""
 )
 
 source_type = st.radio(
