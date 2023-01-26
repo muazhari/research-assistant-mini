@@ -6,9 +6,9 @@ Research Assistant Mini App using Streamlit user interface.
 ## Features
 
 - Passage Search (Done)
-- Open-ended QA
-- Document Network
-- Document Search
+- Open-ended QA (Not yet implemented)
+- Document Network (Not yet implemented)
+- Document Search (Not yet implemented)
 
 ## Authors
 
@@ -16,6 +16,7 @@ Research Assistant Mini App using Streamlit user interface.
 
 ## Demo
 
+- Passage Search (Old Version)
 [![demo](http://img.youtube.com/vi/bu93G6YesaQ/0.jpg)](http://www.youtube.com/watch?v=bu93G6YesaQ)
 
 ## Walkthrough 
