@@ -1,0 +1,1 @@
+{"sql_url": "sqlite:///document_store/document_store.db", "index": "d41d8cd98f00b204e9800998ecf8427e_c4ca4238a0b923820dcc509a6f75849b", "embedding_dim": 1024, "return_embedding": true, "similarity": "cosine", "duplicate_documents": "skip"}
