@@ -25,8 +25,8 @@ class PassageSearch:
         for window_sized_processed_corpus in window_sized_processed_corpuses:
             for index_window, window in enumerate(window_sized_processed_corpus["processed_corpus"]):
                 window_sized_document = Document(
-                    content=pre_processor.degranularize(
-                        granularized_corpus=[window],
+                    content=pre_processor.deprocess(
+                        processed_corpus=[window],
                         granularity_source=passage_search_request["granularity"]
                     ),
                     meta={"index_window": index_window, "window_size": window_sized_processed_corpus["window_size"]}

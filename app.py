@@ -8,10 +8,19 @@ from pre_processor import pre_processor
 import hashlib
 import streamlit as st
 import os
+import pathlib
+
+
+STREAMLIT_STATIC_PATH = pathlib.Path(st.__path__[0]) / 'static' / 'static'
+
+
+st.title("Passage Search")
+
+st.subheader("Configurations")
 
 open_ai_api_key = st.text_input(
     label="Enter an OpenAI API key.",
-    value=""
+    value="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"
 )
 
 source_type = st.radio(
@@ -37,7 +46,7 @@ if (source_type in ['file']):
         st.success("File uploaded!")
 
 
-if (corpus != "" and source_type in ['file', 'web']):
+if (corpus != "" and source_type in ['file']):
     file_name = os.path.splitext(os.path.basename(corpus))[0]
     pdf_page_length = document_conversion.get_pdf_page_length(corpus)
 
@@ -55,7 +64,7 @@ if (corpus != "" and source_type in ['file', 'web']):
     )
 
     splitted_uploaded_file_name = f'{file_name}_split_{initial_page}_to_{final_page}.pdf'
-    splitted_uploaded_file_path = f"temp/{splitted_uploaded_file_name}"
+    splitted_uploaded_file_path = STREAMLIT_STATIC_PATH/f"{splitted_uploaded_file_name}"
     corpus = pre_processor.split_pdf(corpus, splitted_uploaded_file_path)
 
 query = st.text_area(
@@ -96,8 +105,9 @@ if (None not in passage_search_request.values() and all(value != "" for value in
     passage_search_response = passage_search.search(passage_search_request)
                     
     result_windowed_documents = passage_search_response["retrieval_result"]["documents"]
-    result_documents = pre_processor.textract(
+    result_documents = pre_processor.granularize(
         corpus=passage_search_request["corpus"],
+        source_type=passage_search_request["source_type"],
         granularity=passage_search_request["granularity"]
     )
 
@@ -107,14 +117,28 @@ if (None not in passage_search_request.values() and all(value != "" for value in
         document_indexes_with_overlapped_scores=result_document_indexes_with_overlapped_scores,
         percentage=passage_search_request["percentage"]
     )
-        
-    pdf_output_file_path = document_conversion.corpus_to_pdf(passage_search_request)
+    
+    
     passage_search_request_hash = hashlib.md5(str(passage_search_request).encode("utf-8")).hexdigest()
-    highlighted_pdf_output_file_path = f"temp/highlighted_output_{passage_search_request_hash}.pdf"
-
+    pdf_output_file_path = document_conversion.corpus_to_pdf(
+        passage_search_request,
+        output_file_path = STREAMLIT_STATIC_PATH / f"output_{passage_search_request_hash}.pdf"
+    )
+    passage_search_request_hash = hashlib.md5(str(passage_search_request).encode("utf-8")).hexdigest()
+    highlighted_pdf_output_file_name = f"highlighted_output_{passage_search_request_hash}.pdf"
+    highlighted_pdf_output_file_path = STREAMLIT_STATIC_PATH / highlighted_pdf_output_file_name
     highlights = annotater.annotate(
         labels=result_labels, 
         documents=result_documents, 
         input_file_path=pdf_output_file_path, 
         output_file_path=highlighted_pdf_output_file_path
     )
+    print(result_labels)
+    print(result_documents)
+    print(pdf_output_file_path)
+    print(highlighted_pdf_output_file_path)
+    print(highlights)
+
+    pdf_display = f'<iframe src="static/{highlighted_pdf_output_file_name}" width="700" height="1000"></iframe>'
+    st.subheader("Output Content")
+    st.markdown(pdf_display, unsafe_allow_html=True)

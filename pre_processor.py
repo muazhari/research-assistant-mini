@@ -44,24 +44,29 @@ class PreProcessor:
             raise ValueError(f"Source type {source_type} is not supported.")
         return granularized_corpus
 
-    def dewindowize(self, granularized_corpus: List[Tuple[str]]) -> List[str]:
+    def dewindowize(self, windowed_corpus: List[Tuple[str]]) -> List[str]:
         result = {}
-        for window in granularized_corpus:
+        for window in windowed_corpus:
             for document in window:
                 result[document] = None
 
         return result.keys()
 
-    def degranularize(self, granularized_corpus: List[Tuple[str]], granularity_source: str) -> str:
-        dewindowized_corpus = self.dewindowize(granularized_corpus)
+    def degranularize(self, granularized_corpus: List[str], granularity_source: str) -> str:
         degranularized_corpus = None
         if granularity_source in ["word", "sentence"]:
-            degranularized_corpus = " ".join(dewindowized_corpus)
+            degranularized_corpus = " ".join(granularized_corpus)
         elif granularity_source in ["paragraph"]:
-            degranularized_corpus = "\n".join(dewindowized_corpus)
+            degranularized_corpus = "\n".join(granularized_corpus)
         else:
             ValueError(f"Granularity {granularity_source} is not supported.")
         return degranularized_corpus
+    
+    def deprocess(self, processed_corpus: List[Tuple[str]], granularity_source: str) -> str:
+        dewindowized_corpus = self.dewindowize(processed_corpus)
+        degranularized_corpus = self.degranularize(dewindowized_corpus, granularity_source)
+        deprocessed_corpus = degranularized_corpus
+        return deprocessed_corpus
 
     def windowize(self, corpus: str, window_size: int) -> List[Tuple[str, ...]]:
         return list(more_itertools.windowed(corpus, window_size))
