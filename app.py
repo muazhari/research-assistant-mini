@@ -1,4 +1,4 @@
-import uuid
+import pandas as pd
 from passage_search import passage_search
 from document_conversion import document_conversion
 from annotater import annotater
@@ -9,6 +9,8 @@ import hashlib
 import streamlit as st
 import os
 import pathlib
+
+from datetime import datetime
 
 
 STREAMLIT_STATIC_PATH = pathlib.Path(st.__path__[0]) / 'static' / 'static'
@@ -29,11 +31,7 @@ source_type = st.radio(
     index=1
 )
 
-corpus = st.text_area(
-    label="Enter a corpus.",
-    value=""
-)
-
+corpus = ""
 if (source_type in ['file']):
     uploaded_file = st.file_uploader(
         label="Upload a file.", 
@@ -42,30 +40,40 @@ if (source_type in ['file']):
     )
 
     if None not in [uploaded_file]:
-        corpus = document_conversion.file_bytes_to_pdf(uploaded_file.getbuffer())
+        uploaded_file_hash = hashlib.md5(uploaded_file.getbuffer()).hexdigest()
+        uploaded_file_name = "{}.pdf".format(uploaded_file_hash)
+        uploaded_file_path = STREAMLIT_STATIC_PATH / uploaded_file_name
+        corpus = str(document_conversion.file_bytes_to_pdf(uploaded_file.getbuffer(), uploaded_file_path))
         st.success("File uploaded!")
+elif (source_type in ['text', 'web']):
+    corpus = st.text_area(
+        label="Enter a corpus.",
+        value=""
+    )
+else:
+    st.error("Please select a right source type.")
 
 
 if (corpus != "" and source_type in ['file']):
-    file_name = os.path.splitext(os.path.basename(corpus))[0]
-    pdf_page_length = document_conversion.get_pdf_page_length(corpus)
+    uploaded_file_name = os.path.splitext(os.path.basename(corpus))[0]
+    uploaded_file_page_length = document_conversion.get_pdf_page_length(corpus)
 
-    initial_page = st.number_input(
-        label=f"Enter the start page of the pdf you want to be highlighted (1-{pdf_page_length}).", 
+    start_page = st.number_input(
+        label=f"Enter the start page of the pdf you want to be highlighted (1-{uploaded_file_page_length}).", 
         min_value=1, 
-        max_value=pdf_page_length, 
+        max_value=uploaded_file_page_length, 
         value=1
     )
-    final_page = st.number_input(
-        f"Enter the end page of the pdf you want to be highlighted (1-{pdf_page_length}).", 
+    end_page = st.number_input(
+        f"Enter the end page of the pdf you want to be highlighted (1-{uploaded_file_page_length}).", 
         min_value=1,
-        max_value=pdf_page_length, 
+        max_value=uploaded_file_page_length, 
         value=1
     )
 
-    splitted_uploaded_file_name = f'{file_name}_split_{initial_page}_to_{final_page}.pdf'
+    splitted_uploaded_file_name = f'{uploaded_file_name}_split_{start_page}_to_{end_page}.pdf'
     splitted_uploaded_file_path = STREAMLIT_STATIC_PATH/f"{splitted_uploaded_file_name}"
-    corpus = pre_processor.split_pdf(corpus, splitted_uploaded_file_path)
+    corpus = str(document_conversion.split_pdf_page(start_page, end_page, uploaded_file_path, splitted_uploaded_file_path))
 
 query = st.text_area(
     label="Enter a query.",
@@ -133,12 +141,24 @@ if (None not in passage_search_request.values() and all(value != "" for value in
         input_file_path=pdf_output_file_path, 
         output_file_path=highlighted_pdf_output_file_path
     )
-    print(result_labels)
-    print(result_documents)
-    print(pdf_output_file_path)
-    print(highlighted_pdf_output_file_path)
-    print(highlights)
-
-    pdf_display = f'<iframe src="static/{highlighted_pdf_output_file_name}" width="700" height="1000"></iframe>'
+    
+    st.subheader("Output Score Overview")
+    st.caption(
+        "Metric to determine how sure the meaning of the query is in the corpus (score to document in descending order).")
+    chart_df = pd.DataFrame(
+        data=[value['score_mean'] for value in sorted(
+                    result_document_indexes_with_overlapped_scores.values(), 
+                    key=lambda value: value["score_mean"], 
+                    reverse=True
+                )
+            ],
+        columns=['score']
+    )
+    st.line_chart(chart_df)
+        
+    st.subheader("Output Process Duration")
+    st.write("{} seconds".format(passage_search_response["process_duration"]))
+    
     st.subheader("Output Content")
+    pdf_display = f'<iframe src="static/{highlighted_pdf_output_file_name}" width="700" height="1000"></iframe>'
     st.markdown(pdf_display, unsafe_allow_html=True)

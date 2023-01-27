@@ -3,7 +3,7 @@ import os
 from haystack.nodes import EmbeddingRetriever
 from haystack.utils import print_documents
 from haystack.pipelines import DocumentSearchPipeline
-from haystack.document_stores import FAISSDocumentStore, PineconeDocumentStore
+from haystack.document_stores import FAISSDocumentStore, PineconeDocumentStore, BaseDocumentStore
 from haystack.schema import Document
 from pre_processor import pre_processor
 import hashlib
@@ -11,6 +11,17 @@ from typing import List, Tuple, Optional, Any
 
 
 class PassageSearch:
+    
+    def get_retriever(self, document_store: BaseDocumentStore, passage_search_request: dict) -> EmbeddingRetriever:
+        retriever: EmbeddingRetriever = EmbeddingRetriever(
+                document_store=document_store,
+                model_format="openai",
+                embedding_model="ada",
+                api_key=passage_search_request["open_ai_api_key"],
+            )
+        return retriever
+    
+    
     def search(self, passage_search_request: dict):
         time_start: datetime = datetime.now()
 
@@ -38,11 +49,12 @@ class PassageSearch:
         document_store_index_hash: str = f"{corpus_hash}_{window_sizes_hash}"
         faiss_index_path: str = f"document_store/faiss_index_{document_store_index_hash}"
         faiss_config_path: str = f"document_store/faiss_config_{document_store_index_hash}"
-        if all(os.path.exists(path) for path in [faiss_index_path, faiss_config_path]):
+        if all(map(os.path.exists, [faiss_index_path, faiss_config_path])):
             document_store: FAISSDocumentStore = FAISSDocumentStore.load(
                 index_path=faiss_index_path,
                 config_path=faiss_config_path,
             )
+            retriever: EmbeddingRetriever = self.get_retriever(document_store=document_store, passage_search_request=passage_search_request)
         else:
             document_store: FAISSDocumentStore = FAISSDocumentStore(
                 sql_url="sqlite:///document_store/document_store.db",
@@ -52,17 +64,16 @@ class PassageSearch:
                 similarity="cosine",
                 duplicate_documents="skip",
             )
+            retriever: EmbeddingRetriever = EmbeddingRetriever(
+                document_store=document_store,
+                model_format="openai",
+                embedding_model="ada",
+                api_key=passage_search_request["open_ai_api_key"],
+            )
             document_store.write_documents(window_sized_documents)
+            document_store.update_embeddings(retriever)
             document_store.save(faiss_index_path, faiss_config_path)
             
-        retriever: EmbeddingRetriever = EmbeddingRetriever(
-            document_store=document_store,
-            model_format="openai",
-            embedding_model="ada",
-            api_key=passage_search_request["open_ai_api_key"],
-        )
-        
-        document_store.update_embeddings(retriever)
         
         pipeline_retrieval: DocumentSearchPipeline = DocumentSearchPipeline(retriever)
         retrieval_result: dict = pipeline_retrieval.run(

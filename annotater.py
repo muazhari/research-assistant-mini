@@ -1,7 +1,7 @@
 import re
 from typing import List, Tuple, Optional, Any
-from pathlib import Path
 from txtmarker.factory import Factory
+from pathlib import Path
 
 
 class Annotater():
