@@ -5,10 +5,10 @@ Research Assistant Mini App using Streamlit user interface.
 
 ## Features
 
-- Passage Search
-- Open-ended QA
-- Document Network
-- Document Search
+- Passage Search (Done)
+- Open-ended QA (Not yet implemented)
+- Document Network (Not yet implemented)
+- Document Search (Not yet implemented)
 
 ## Authors
 
@@ -16,11 +16,12 @@ Research Assistant Mini App using Streamlit user interface.
 
 ## Demo
 
+- Passage Search (Old Version)
 [![demo](http://img.youtube.com/vi/bu93G6YesaQ/0.jpg)](http://www.youtube.com/watch?v=bu93G6YesaQ)
 
 ## Walkthrough 
 
-1. Get your OPEN AI API key.
+1. Get your Open AI API key.
 2. Get your Ngrok Authentication Token.
 3. Create cell based on below Jupyter Notebook script in Google Colab, Kaggle, or other alternatives.
 
