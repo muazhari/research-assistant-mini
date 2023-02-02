@@ -17,7 +17,7 @@ class PreProcessor:
         elif granularity == "word":
             granularized_corpus = corpus.split(" ")
         else:
-            raise ValueError("Granularity not supported.")
+            ValueError(f"Granularity {granularity} is not supported.")
         return granularized_corpus
 
     def textract(self, corpus: str, granularity: str) -> List[str]:

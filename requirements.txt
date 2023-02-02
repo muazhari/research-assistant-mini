@@ -6,3 +6,4 @@ PyVirtualDisplay
 streamlit
 txtai
 txtmarker
+faiss-cpu
