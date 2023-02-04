@@ -1,30 +1,28 @@
 from datetime import datetime, timedelta
-import os
-
-from haystack.utils import print_documents
+from haystack.nodes import EmbeddingRetriever, BaseRetriever
 from haystack.pipelines import DocumentSearchPipeline
-from haystack.nodes import EmbeddingRetriever
-from haystack.document_stores import FAISSDocumentStore, PineconeDocumentStore, BaseDocumentStore
+from haystack.document_stores import FAISSDocumentStore, BaseDocumentStore
 from haystack.schema import Document
-from pre_processor import pre_processor
-from retriever_model import retriever_model
+from utilities.pre_processor import pre_processor
+from sub_apps.passage_search.retriever_model import retriever_model
 import hashlib
 from typing import List, Tuple, Optional, Any
+import os
 
 
 class PassageSearch:
-    
-    def search(self, passage_search_request: dict):
-        time_start: datetime = datetime.now()
 
+    def get_window_sized_documents(self, passage_search_request: dict) -> List[Document]:
         window_sized_processed_corpuses: List[dict] = pre_processor.get_window_sized_processed_corpuses(
             corpus=passage_search_request["corpus"],
             source_type=passage_search_request["source_type"],
             granularity=passage_search_request["granularity"],
-            window_sizes=list(map(int, passage_search_request["window_sizes"].split(" ")))
+            window_sizes=list(
+                map(int, passage_search_request["window_sizes"].split(" ")))
         )
-        window_sized_documents: List[Document]= []
-        
+
+        window_sized_documents: List[Document] = []
+
         for window_sized_processed_corpus in window_sized_processed_corpuses:
             for index_window, window in enumerate(window_sized_processed_corpus["processed_corpus"]):
                 window_sized_document = Document(
@@ -32,21 +30,33 @@ class PassageSearch:
                         processed_corpus=[window],
                         granularity_source=passage_search_request["granularity"]
                     ),
-                    meta={"index_window": index_window, "window_size": window_sized_processed_corpus["window_size"]}
+                    meta={"index_window": index_window,
+                          "window_size": window_sized_processed_corpus["window_size"]}
                 )
                 window_sized_documents.append(window_sized_document)
 
-        corpus_hash: str = hashlib.md5(passage_search_request["corpus"].encode('utf-8')).hexdigest() 
-        window_sizes_hash: str = hashlib.md5(passage_search_request["window_sizes"].encode('utf-8')).hexdigest()
-        document_store_index_hash: str = f"{corpus_hash}_{window_sizes_hash}"
+        return window_sized_documents
+
+    def get_retriever(self, passage_search_request: dict, documents: List[Document]) -> BaseRetriever:
+        corpus_hash: str = hashlib.md5(
+            passage_search_request["corpus"].encode("utf-8")).hexdigest()
+        window_sizes_hash: str = hashlib.md5(
+            passage_search_request["window_sizes"].encode("utf-8")).hexdigest()
+        embedding_model_concated = f"{passage_search_request['embedding_model']}_{passage_search_request['query_embedding_model']}_{passage_search_request['query_embedding_model']}"
+        embedding_model_hash = hashlib.md5(
+            embedding_model_concated.encode("utf-8")).hexdigest()
+
+        document_store_index_hash: str = f"{embedding_model_hash}_{corpus_hash}_{window_sizes_hash}"
         faiss_index_path: str = f"document_store/faiss_index_{document_store_index_hash}"
         faiss_config_path: str = f"document_store/faiss_config_{document_store_index_hash}"
+
+        retriever: BaseRetriever = None
         if all(map(os.path.exists, [faiss_index_path, faiss_config_path])):
             document_store: FAISSDocumentStore = FAISSDocumentStore.load(
                 index_path=faiss_index_path,
                 config_path=faiss_config_path,
             )
-            retriever: EmbeddingRetriever = retriever_model.get_retriever(
+            retriever = retriever_model.get_retriever(
                 document_store=document_store,
                 passage_search_request=passage_search_request,
             )
@@ -56,20 +66,34 @@ class PassageSearch:
                 index=document_store_index_hash,
                 embedding_dim=passage_search_request["embedding_dimension"],
                 return_embedding=True,
-                similarity="cosine",
+                similarity=passage_search_request["similarity_function"],
                 duplicate_documents="skip",
             )
-            retriever: EmbeddingRetriever = retriever_model.get_retriever(
+            retriever = retriever_model.get_retriever(
                 document_store=document_store,
                 passage_search_request=passage_search_request,
             )
-            document_store.write_documents(window_sized_documents)
+            document_store.write_documents(documents)
             document_store.update_embeddings(retriever)
             document_store.save(faiss_index_path, faiss_config_path)
-            
-        
-        pipeline_retrieval: DocumentSearchPipeline = DocumentSearchPipeline(retriever)
-        retrieval_result: dict = pipeline_retrieval.run(
+
+        return retriever
+
+    def search(self, passage_search_request: dict):
+        time_start: datetime = datetime.now()
+
+        window_sized_documents: List[Document] = self.get_window_sized_documents(
+            passage_search_request=passage_search_request
+        )
+
+        retriever: BaseRetriever = self.get_retriever(
+            passage_search_request=passage_search_request,
+            documents=window_sized_documents
+        )
+
+        retrieval_pipeline: DocumentSearchPipeline = DocumentSearchPipeline(
+            retriever)
+        retrieval_result: dict = retrieval_pipeline.run(
             query=passage_search_request["query"],
             params={"Retriever": {"top_k": len(window_sized_documents)}},
             debug=True
@@ -77,7 +101,7 @@ class PassageSearch:
 
         time_finish: datetime = datetime.now()
         time_delta: timedelta = time_finish - time_start
-        
+
         response: dict = {
             "retrieval_result": retrieval_result,
             "process_duration": time_delta.total_seconds()
