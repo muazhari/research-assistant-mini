@@ -36,6 +36,7 @@ class LongFormQAGUI:
                 label="Enter a sentence transformer passage embedding model.",
                 value="vblagoje/dpr-ctx_encoder-single-lfqa-wiki"
             )
+            embedding_model = None
             embedding_dimension = st.number_input(
                 label="Enter a embedding dimension.",
                 value=128,
@@ -88,6 +89,7 @@ class LongFormQAGUI:
                 label="Enter a maximum length of the answer.",
                 value=300
             )
+            answer_max_tokens = None
         elif(generator_model_format == 'openai_answer'):
             open_ai_generator_model = [
                 "text-ada-001",
@@ -218,14 +220,20 @@ class LongFormQAGUI:
                 lfqa_request=lfqa_request
             )
 
-            result_windowed_documents = lfqa_search_response["generative_qa_result"]["answers"]
-
+            answers_response = lfqa_search_response["generative_qa_result"]["answers"]
+            metadata_response = answers_response[0].meta
             st.subheader("Output Process Duration")
-            st.write("{} seconds".format(
-                lfqa_search_response["process_duration"]))
+            st.write(f"{lfqa_search_response['process_duration']} seconds")
 
-            st.subheader("Output Content")
-            st.write(result_windowed_documents)
+            st.subheader("Output Content")            
+            st.write(f"Answer: {answers_response[0].answer}")
+            st.write(f"Retrieved documents:")
+            retrieved_documents_df = pd.DataFrame(
+                columns=["Content", "Score"], 
+                data=zip(metadata_response["content"], 
+                      metadata_response["doc_scores"])
+            )
+            st.table(retrieved_documents_df)
 
 
 long_form_qa_gui = LongFormQAGUI()
