@@ -29,11 +29,11 @@ class LongFormQAGUI:
 
         if(retriever_model_format == 'dense_passage'):
             query_embedding_model = st.text_input(
-                label="Enter a sentence transformer query embedding model.",
+                label="Enter a query embedding model.",
                 value="vblagoje/dpr-question_encoder-single-lfqa-wiki"
             )
             passage_embedding_model = st.text_input(
-                label="Enter a sentence transformer passage embedding model.",
+                label="Enter a passage embedding model.",
                 value="vblagoje/dpr-ctx_encoder-single-lfqa-wiki"
             )
             embedding_model = None
@@ -41,7 +41,7 @@ class LongFormQAGUI:
                 label="Enter a embedding dimension.",
                 value=128,
             )
-            api_key = None
+            retriever_api_key = None
         elif(retriever_model_format == 'openai'):
             open_ai_embedding_model = {
                 "ada": 1024,
@@ -57,8 +57,8 @@ class LongFormQAGUI:
                 index=0
             )
             embedding_dimension = open_ai_embedding_model[embedding_model]
-            api_key = st.text_input(
-                label="Enter an OpenAI API key.",
+            retriever_api_key = st.text_input(
+                label="Enter an OpenAI API key for retriever.",
                 value=""
             )
         else:
@@ -78,7 +78,7 @@ class LongFormQAGUI:
 
         if(generator_model_format == 'seq2seq'):
             generator_model = st.text_input(
-                label="Enter a sentence transformer generator model.",
+                label="Enter a generator model.",
                 value="vblagoje/bart_lfqa"
             )
             answer_min_length = st.number_input(
@@ -90,6 +90,7 @@ class LongFormQAGUI:
                 value=300
             )
             answer_max_tokens = None
+            generator_api_key = None
         elif(generator_model_format == 'openai_answer'):
             open_ai_generator_model = [
                 "text-ada-001",
@@ -107,6 +108,10 @@ class LongFormQAGUI:
             answer_max_tokens = st.number_input(
                 label="Enter a maximum tokens in the answer.",
                 value=13
+            )
+            generator_api_key = st.text_input(
+                label="Enter an OpenAI API key for generator.",
+                value=""
             )
         else:
             st.error("Please select a right model format.")
@@ -203,7 +208,7 @@ class LongFormQAGUI:
             "passage_embedding_model": passage_embedding_model,
             "embedding_dimension": embedding_dimension,
             "similarity_function": similarity_function,
-            "api_key": api_key
+            "api_key": retriever_api_key
         }
 
         lfqa_request = {
@@ -212,7 +217,7 @@ class LongFormQAGUI:
             "answer_min_length": answer_min_length,
             "answer_max_length": answer_max_length,
             "answer_max_tokens": answer_max_tokens,
-            "api_key": api_key
+            "api_key": generator_api_key
         }
 
         if (all(value != "" for value in list(passage_search_request.values()) + list(lfqa_request.values()))):
@@ -227,7 +232,8 @@ class LongFormQAGUI:
             st.write(f"{lfqa_search_response['process_duration']} seconds")
 
             st.subheader("Output Content")            
-            st.write(f"Answer: {answers_response[0].answer}")
+            st.write(f"Answer:")
+            st.write(f"{answers_response[0].answer}")
             st.write(f"Retrieved documents:")
             retrieved_documents_df = pd.DataFrame(
                 columns=["Content", "Score"], 

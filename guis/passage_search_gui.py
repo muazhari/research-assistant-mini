@@ -31,7 +31,7 @@ class PassageSearchGUI:
 
         if(model_format == 'sentence_transformers'):
             embedding_model = st.text_input(
-                label="Enter a sentence transformer embedding model.",
+                label="Enter an embedding model.",
                 value="sentence-transformers/multi-qa-mpnet-base-cos-v1"
             )
             embedding_dimension = st.number_input(
@@ -47,7 +47,7 @@ class PassageSearchGUI:
                 "davinci": 12288
             }
             embedding_model = st.radio(
-                label="Enter an openai embedding model.",
+                label="Enter an embedding model.",
                 options=open_ai_model.keys(),
                 index=0
             )
