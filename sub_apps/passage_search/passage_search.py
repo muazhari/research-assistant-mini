@@ -42,7 +42,7 @@ class PassageSearch:
             passage_search_request["corpus"].encode("utf-8")).hexdigest()
         window_sizes_hash: str = hashlib.md5(
             passage_search_request["window_sizes"].encode("utf-8")).hexdigest()
-        embedding_model_concated = f"{passage_search_request['embedding_model']}_{passage_search_request['query_embedding_model']}_{passage_search_request['query_embedding_model']}"
+        embedding_model_concated = f"{passage_search_request['embedding_model']}_{passage_search_request.get('query_embedding_model', None)}_{passage_search_request.get('passage_embedding_model', None)}"
         embedding_model_hash = hashlib.md5(
             embedding_model_concated.encode("utf-8")).hexdigest()
 
