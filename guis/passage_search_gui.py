@@ -138,10 +138,11 @@ class PassageSearchGUI:
         percentage = st.slider(
             label='Pick a percentage.',
             min_value=0.0,
-            max_value=1.0,
+            max_value=100.0,
             step=0.01,
-            value=0.1
+            value=10.1
         )
+        percentage = percentage / 100
 
         passage_search_request = {
             "source_type": source_type,

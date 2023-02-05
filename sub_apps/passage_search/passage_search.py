@@ -42,9 +42,15 @@ class PassageSearch:
             passage_search_request["corpus"].encode("utf-8")).hexdigest()
         window_sizes_hash: str = hashlib.md5(
             passage_search_request["window_sizes"].encode("utf-8")).hexdigest()
-        embedding_model_concated = f"{passage_search_request['embedding_model']}_{passage_search_request.get('query_embedding_model', None)}_{passage_search_request.get('passage_embedding_model', None)}"
+        embedding_model_concatenated = "_".join([
+            str(x) for x in [
+                passage_search_request.get("embedding_model", None),
+                passage_search_request.get("query_embedding_model", None),
+                passage_search_request.get("passage_embedding_model", None)
+            ]
+        ])
         embedding_model_hash = hashlib.md5(
-            embedding_model_concated.encode("utf-8")).hexdigest()
+            embedding_model_concatenated.encode("utf-8")).hexdigest()
 
         document_store_index_hash: str = f"{embedding_model_hash}_{corpus_hash}_{window_sizes_hash}"
         faiss_index_path: str = f"document_store/faiss_index_{document_store_index_hash}"
