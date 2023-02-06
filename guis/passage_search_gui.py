@@ -202,14 +202,15 @@ class PassageSearchGUI:
 
             st.subheader("Output Score Overview")
             st.caption(
-                "Metric to determine how sure the meaning of the query is in the corpus (score to document in descending order).")
+                "Metric to determine how sure the meaning of the query is in the corpus (score_mean to document in descending order).")
+            sorted_result_document_indexes_with_overlapped_scores_items = sorted(
+                result_document_indexes_with_overlapped_scores.items(),
+                key=lambda item: item[1]["score_mean"],
+                reverse=True
+            )
             chart_df = pd.DataFrame(
-                data=[value['score_mean'] for value in sorted(
-                    result_document_indexes_with_overlapped_scores.values(),
-                    key=lambda value: value["score_mean"],
-                    reverse=True
-                )
-                ],
+                data=[value['score_mean']
+                      for key, value in sorted_result_document_indexes_with_overlapped_scores_items],
                 columns=['score']
             )
             st.line_chart(chart_df)
@@ -229,12 +230,12 @@ class PassageSearchGUI:
             retrieved_documents_df = pd.DataFrame(
                 columns=["Content", "Score Mean", "Score Count"],
                 data=zip(
-                    [result_documents[index] for index in
-                     result_document_indexes_with_overlapped_scores.keys()],
-                    [score["score_mean"] for score in
-                     result_document_indexes_with_overlapped_scores.values()],
-                    [score["count"] for score in
-                     result_document_indexes_with_overlapped_scores.values()]
+                    [result_documents[key] for key, value in
+                     sorted_result_document_indexes_with_overlapped_scores_items],
+                    [value["score_mean"] for key, value in
+                     sorted_result_document_indexes_with_overlapped_scores_items],
+                    [value["count"] for key, value in
+                     sorted_result_document_indexes_with_overlapped_scores_items]
                 )
             )
             st.table(retrieved_documents_df)
