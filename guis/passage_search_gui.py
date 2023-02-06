@@ -101,13 +101,13 @@ class PassageSearchGUI:
                 corpus)
 
             start_page = st.number_input(
-                label=f"Enter the start page of the pdf you want to be highlighted (1-{uploaded_file_page_length}).",
+                label=f"Enter the start page of the pdf you want to be retrieved (1-{uploaded_file_page_length}).",
                 min_value=1,
                 max_value=uploaded_file_page_length,
                 value=1
             )
             end_page = st.number_input(
-                f"Enter the end page of the pdf you want to be highlighted (1-{uploaded_file_page_length}).",
+                f"Enter the end page of the pdf you want to be retrieved (1-{uploaded_file_page_length}).",
                 min_value=1,
                 max_value=uploaded_file_page_length,
                 value=1
@@ -140,7 +140,7 @@ class PassageSearchGUI:
             min_value=0.0,
             max_value=100.0,
             step=0.01,
-            value=10.1
+            value=10.0
         )
         percentage = percentage / 100
 
@@ -173,9 +173,14 @@ class PassageSearchGUI:
             result_document_indexes_with_overlapped_scores = search_statistics.get_document_indexes_with_overlapped_scores(
                 result_windowed_documents)
 
-            result_labels = search_statistics.get_selected_labels(
+            selected_result_labels = search_statistics.get_selected_labels(
                 document_indexes_with_overlapped_scores=result_document_indexes_with_overlapped_scores,
                 percentage=passage_search_request["percentage"]
+            )
+            selected_result_documents = search_statistics.get_selected_documents(
+                document_indexes_with_overlapped_scores=result_document_indexes_with_overlapped_scores,
+                percentage=passage_search_request["percentage"],
+                source_documents=result_documents
             )
 
             passage_search_request_hash = hashlib.md5(
@@ -185,17 +190,15 @@ class PassageSearchGUI:
                 output_file_path=self.STREAMLIT_STATIC_PATH /
                 f"output_{passage_search_request_hash}.pdf"
             )
-            passage_search_request_hash = hashlib.md5(
-                str(passage_search_request).encode("utf-8")).hexdigest()
-            highlighted_pdf_output_file_name = f"highlighted_output_{passage_search_request_hash}.pdf"
-            highlighted_pdf_output_file_path = self.STREAMLIT_STATIC_PATH / \
-                highlighted_pdf_output_file_name
-            highlights = annotater.annotate(
-                labels=result_labels,
-                documents=result_documents,
+            highlighted_pdf_output_file_path = annotater.annotate(
+                labels=selected_result_labels,
+                documents=selected_result_documents,
                 input_file_path=pdf_output_file_path,
-                output_file_path=highlighted_pdf_output_file_path
+                output_file_path=self.STREAMLIT_STATIC_PATH /
+                f"highlighted_output_{passage_search_request_hash}.pdf",
             )
+            highlighted_pdf_output_file_name = os.path.basename(
+                highlighted_pdf_output_file_path)
 
             st.subheader("Output Score Overview")
             st.caption(
@@ -216,8 +219,25 @@ class PassageSearchGUI:
                 passage_search_response["process_duration"]))
 
             st.subheader("Output Content")
+
+            st.write(f"Highlighted documents:")
             pdf_display = f'<iframe src="static/{highlighted_pdf_output_file_name}" width="700" height="1000"></iframe>'
             st.markdown(pdf_display, unsafe_allow_html=True)
+
+            st.write(f"Retrieved documents:")
+
+            retrieved_documents_df = pd.DataFrame(
+                columns=["Content", "Score Mean", "Score Count"],
+                data=zip(
+                    [result_documents[index] for index in
+                     result_document_indexes_with_overlapped_scores.keys()],
+                    [score["score_mean"] for score in
+                     result_document_indexes_with_overlapped_scores.values()],
+                    [score["count"] for score in
+                     result_document_indexes_with_overlapped_scores.values()]
+                )
+            )
+            st.table(retrieved_documents_df)
 
 
 passage_search_gui = PassageSearchGUI()

@@ -152,13 +152,13 @@ class LongFormQAGUI:
                 corpus)
 
             start_page = st.number_input(
-                label=f"Enter the start page of the pdf you want to be highlighted (1-{uploaded_file_page_length}).",
+                label=f"Enter the start page of the pdf you want to be retrieved (1-{uploaded_file_page_length}).",
                 min_value=1,
                 max_value=uploaded_file_page_length,
                 value=1
             )
             end_page = st.number_input(
-                f"Enter the end page of the pdf you want to be highlighted (1-{uploaded_file_page_length}).",
+                f"Enter the end page of the pdf you want to be retrieved (1-{uploaded_file_page_length}).",
                 min_value=1,
                 max_value=uploaded_file_page_length,
                 value=1

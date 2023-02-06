@@ -2,20 +2,32 @@ import re
 from typing import List, Tuple, Optional, Any
 from txtmarker.factory import Factory
 from pathlib import Path
+import os
 
 
 class Annotater():
 
-    def annotate(self, labels: List[str], documents: List[str], input_file_path: Path, output_file_path: Path) -> List[Tuple[str, str]]:
+    def annotate(self, labels: List[str], documents: List[str], input_file_path: Path, output_file_path: Path, overwrite: bool = False) -> List[Tuple[str, str]]:
+        if(os.path.exists(output_file_path) and overwrite == False):
+            return output_file_path
+
         highlights = []
         for label, document in zip(labels, documents):
             highlight = (label, document)
             highlights.append(highlight)
-            
-        highlighter = Factory.create("pdf", self.formatter, 4)
-        highlighter.highlight(str(input_file_path), str(output_file_path), highlights)
-        
-        return highlights
+
+        highlighter = Factory.create(
+            extension="pdf",
+            formatter=self.formatter,
+            chunk=4
+        )
+        highlighter.highlight(
+            infile=str(input_file_path),
+            outfile=str(output_file_path),
+            highlights=highlights
+        )
+
+        return output_file_path
 
     def formatter(self, text):
         """

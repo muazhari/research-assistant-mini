@@ -36,8 +36,8 @@ class PassageSearch:
                 window_sized_documents.append(window_sized_document)
 
         return window_sized_documents
-
-    def get_retriever(self, passage_search_request: dict, documents: List[Document]) -> BaseRetriever:
+    
+    def get_document_store_index_hash(self, passage_search_request: dict) -> str:
         corpus_hash: str = hashlib.md5(
             passage_search_request["corpus"].encode("utf-8")).hexdigest()
         window_sizes_hash: str = hashlib.md5(
@@ -53,6 +53,13 @@ class PassageSearch:
             embedding_model_concatenated.encode("utf-8")).hexdigest()
 
         document_store_index_hash: str = f"{embedding_model_hash}_{corpus_hash}_{window_sizes_hash}"
+        
+        return document_store_index_hash
+
+    def get_retriever(self, passage_search_request: dict, documents: List[Document]) -> BaseRetriever:
+        document_store_index_hash: str = self.get_document_store_index_hash(
+            passage_search_request=passage_search_request
+        )
         faiss_index_path: str = f"document_store/faiss_index_{document_store_index_hash}"
         faiss_config_path: str = f"document_store/faiss_config_{document_store_index_hash}"
 
