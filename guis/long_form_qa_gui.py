@@ -47,7 +47,7 @@ class LongFormQAGUI:
                 value="vblagoje/dpr-ctx_encoder-single-lfqa-wiki"
             )
             embedding_dimension = st.number_input(
-                label="Enter a embedding dimension.",
+                label="Enter an embedding dimension.",
                 value=128,
             )
             retriever_openai_api_key = None
