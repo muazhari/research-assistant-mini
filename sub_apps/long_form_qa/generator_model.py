@@ -7,8 +7,8 @@ from sub_apps.long_form_qa.generator_model_converter.parrot_paraphraser_generato
     ParrotParaphraserGeneratorModelConverter
 from sub_apps.long_form_qa.generator_model_converter.t5_lfqa_generator_model_converter import \
     T5LFQAGeneratorModelConverter
-from sub_apps.long_form_qa.generator_model_converter.t5_summarizer_generator_model_converter import \
-    T5SummarizerGeneratorModelConverter
+from sub_apps.long_form_qa.generator_model_converter.flan_t5_summarizer_generator_model_converter import \
+    FlanT5SummarizerGeneratorModelConverter
 
 
 class GeneratorModel:
@@ -21,7 +21,7 @@ class GeneratorModel:
         elif lfqa_request.generator_model == "pszemraj/t5-base-askscience-lfqa":
             generator_model_input_converter: T5LFQAGeneratorModelConverter = T5LFQAGeneratorModelConverter()
         elif lfqa_request.generator_model == "google/flan-t5-large":
-            generator_model_input_converter: T5SummarizerGeneratorModelConverter = T5SummarizerGeneratorModelConverter()
+            generator_model_input_converter: FlanT5SummarizerGeneratorModelConverter = FlanT5SummarizerGeneratorModelConverter()
         else:
             raise ValueError(f"Generator model {lfqa_request.generator_model} is not supported.")
 
