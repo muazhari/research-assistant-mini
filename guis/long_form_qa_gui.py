@@ -96,7 +96,7 @@ class LongFormQAGUI:
         if generator_model_format == 'seq2seq':
             generator_model = st.text_input(
                 label="Enter a generator model.",
-                value="prithivida/parrot_paraphraser_on_T5"
+                value="google/flan-t5-large"
             )
             answer_min_length = st.number_input(
                 label="Enter a minimum length of the answer.",
