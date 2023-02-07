@@ -126,7 +126,7 @@ class PassageSearchGUI:
                 f"Enter the end page of the pdf you want to be retrieved (1-{uploaded_file_page_length}).",
                 min_value=1,
                 max_value=uploaded_file_page_length,
-                value=13
+                value=uploaded_file_page_length
             )
 
             split_uploaded_file_name: str = f'{uploaded_file_name}_split_{start_page}_to_{end_page}.pdf'
@@ -173,9 +173,8 @@ class PassageSearchGUI:
             api_key=openai_api_key
         )
 
-        print(passage_search_request)
-
-        if all(value is not None for value in passage_search_request.dict(exclude={"openai_api_key"}).values()):
+        passage_search_request_dict: dict = passage_search_request.dict(exclude={"openai_api_key"})
+        if all(value not in [None, ""] for value in passage_search_request_dict.values()):
             passage_search_response: PassageSearchResponse = passage_search.search(
                 passage_search_request=passage_search_request
             )

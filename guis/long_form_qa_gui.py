@@ -96,7 +96,7 @@ class LongFormQAGUI:
         if generator_model_format == 'seq2seq':
             generator_model = st.text_input(
                 label="Enter a generator model.",
-                value="vblagoje/bart_lfqa"
+                value="pszemraj/t5-base-askscience-lfqa"
             )
             answer_min_length = st.number_input(
                 label="Enter a minimum length of the answer.",
@@ -133,7 +133,7 @@ class LongFormQAGUI:
         else:
             st.error("Please select a right model format.")
 
-        source_type = st.radio(
+        source_type: Optional[str] = st.radio(
             label="Pick a source type.",
             options=['file', 'text', 'web'],
             index=1
@@ -237,7 +237,7 @@ class LongFormQAGUI:
         passage_search_request_dict: dict = passage_search_request.dict(exclude={"openai_api_key"})
         lfqa_request_dict: dict = lfqa_request.dict(
             exclude={"openai_api_key", "answer_min_length", "answer_max_length", "answer_max_tokens"})
-        if all(value is not None for value in
+        if all(value not in [None, ""] for value in
                list(passage_search_request_dict.values())
                + list(lfqa_request_dict.values())
                ):

@@ -11,3 +11,4 @@ pydantic
 pandas
 nltk
 torch
+transformers
