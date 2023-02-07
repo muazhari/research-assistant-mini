@@ -5,10 +5,10 @@ from models.lfqa_search_request import LFQARequest
 from sub_apps.long_form_qa.generator_model_converter.base_generator_model_converter import BaseGeneratorModelConverter
 from sub_apps.long_form_qa.generator_model_converter.parrot_paraphraser_generator_model_converter import \
     ParrotParaphraserGeneratorModelConverter
-from sub_apps.long_form_qa.generator_model_converter.qcpg_paraphrase_generator_model_converter import \
-    QCPGParaphraseGeneratorModelConverter
 from sub_apps.long_form_qa.generator_model_converter.t5_lfqa_generator_model_converter import \
     T5LFQAGeneratorModelConverter
+from sub_apps.long_form_qa.generator_model_converter.t5_summarizer_generator_model_converter import \
+    T5SummarizerGeneratorModelConverter
 
 
 class GeneratorModel:
@@ -18,15 +18,10 @@ class GeneratorModel:
             generator_model_input_converter: _BartEli5Converter = _BartEli5Converter()
         elif lfqa_request.generator_model == "prithivida/parrot_paraphraser_on_T5":
             generator_model_input_converter: ParrotParaphraserGeneratorModelConverter = ParrotParaphraserGeneratorModelConverter()
-        elif lfqa_request.generator_model == "ibm/qcpg-sentences":
-            generator_model_input_converter: QCPGParaphraseGeneratorModelConverter = QCPGParaphraseGeneratorModelConverter(
-                model_type="sentences",
-                lexical=0.3,
-                syntactic=0.5,
-                semantic=0.8,
-            )
         elif lfqa_request.generator_model == "pszemraj/t5-base-askscience-lfqa":
             generator_model_input_converter: T5LFQAGeneratorModelConverter = T5LFQAGeneratorModelConverter()
+        elif lfqa_request.generator_model == "google/flan-t5-large":
+            generator_model_input_converter: T5SummarizerGeneratorModelConverter = T5SummarizerGeneratorModelConverter()
         else:
             raise ValueError(f"Generator model {lfqa_request.generator_model} is not supported.")
 

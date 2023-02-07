@@ -12,8 +12,6 @@ class ParrotParaphraserGeneratorModelConverter(BaseGeneratorModelConverter):
             self, tokenizer: PreTrainedTokenizer, query: str, documents: List[Document], top_k: Optional[int] = None
     ) -> BatchEncoding:
         conditioned_doc = " ".join([d.content for d in documents])
-
         input_phrase = re.sub("[^a-zA-Z0-9 \?\'\-\/\:\.]", "", conditioned_doc)
         input_phrase = f"paraphrase: {input_phrase}"
-
         return tokenizer(input_phrase, truncation=True, padding=True, return_tensors="pt")
