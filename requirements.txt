@@ -7,3 +7,7 @@ streamlit
 txtai
 txtmarker
 faiss-cpu
+pydantic
+pandas
+nltk
+torch

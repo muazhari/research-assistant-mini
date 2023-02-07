@@ -1,14 +1,16 @@
-import re
-from typing import List, Tuple, Optional, Any
-from txtmarker.factory import Factory
-from pathlib import Path
 import os
+import re
+from pathlib import Path
+from typing import List
+
+from txtmarker.factory import Factory
 
 
 class Annotater():
 
-    def annotate(self, labels: List[str], documents: List[str], input_file_path: Path, output_file_path: Path, overwrite: bool = False) -> List[Tuple[str, str]]:
-        if(os.path.exists(output_file_path) and overwrite == False):
+    def annotate(self, labels: List[str], documents: List[str], input_file_path: Path, output_file_path: Path,
+                 overwrite: bool = False) -> Path:
+        if os.path.exists(output_file_path) and overwrite is False:
             return output_file_path
 
         highlights = []

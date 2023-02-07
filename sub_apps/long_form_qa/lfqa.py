@@ -1,22 +1,20 @@
 from datetime import datetime, timedelta
-import os
+from typing import List
 
-from haystack.utils import print_documents
-from haystack.pipelines import DocumentSearchPipeline, GenerativeQAPipeline
-from haystack.nodes import EmbeddingRetriever, Seq2SeqGenerator, BaseGenerator
-from haystack.document_stores import FAISSDocumentStore, PineconeDocumentStore, BaseDocumentStore
+from haystack.nodes import EmbeddingRetriever, BaseGenerator
+from haystack.pipelines import GenerativeQAPipeline
 from haystack.schema import Document
-from utilities.pre_processor import pre_processor
-from sub_apps.passage_search.retriever_model import retriever_model
-import hashlib
-from typing import List, Tuple, Optional, Any
-from sub_apps.passage_search.passage_search import passage_search
+
+from models.lfqa_response import LFQAResponse
+from models.lfqa_search_request import LFQARequest
+from models.passage_search_request import PassageSearchRequest
 from sub_apps.long_form_qa.generator_model import generator_model
+from sub_apps.passage_search.passage_search import passage_search
 
 
-class LongFormQA:
+class LFQA:
 
-    def qa(self, passage_search_request, lfqa_request: dict):
+    def qa(self, passage_search_request: PassageSearchRequest, lfqa_request: LFQARequest):
         time_start: datetime = datetime.now()
 
         window_sized_documents: List[Document] = passage_search.get_window_sized_documents(
@@ -38,20 +36,20 @@ class LongFormQA:
         )
 
         generative_qa_result: dict = generative_qa_pipeline.run(
-            query=passage_search_request["query"],
-            params={"Retriever": {"top_k": int(passage_search_request["percentage"] * len(window_sized_documents))}},
+            query=passage_search_request.query,
+            params={"Retriever": {"top_k": int(passage_search_request.percentage * len(window_sized_documents))}},
             debug=True
         )
 
         time_finish: datetime = datetime.now()
         time_delta: timedelta = time_finish - time_start
 
-        response: dict = {
-            "generative_qa_result": generative_qa_result,
-            "process_duration": time_delta.total_seconds()
-        }
+        response: LFQAResponse = LFQAResponse(
+            generative_qa_result=generative_qa_result,
+            process_duration=time_delta.total_seconds()
+        )
 
         return response
 
 
-long_form_qa = LongFormQA()
+long_form_qa = LFQA()

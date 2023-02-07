@@ -1,4 +1,4 @@
-from typing import List, Tuple, Optional, Any
+from typing import List, Tuple
 
 import more_itertools
 from txtai.pipeline import Textractor, Segmentation
@@ -61,7 +61,7 @@ class PreProcessor:
         else:
             ValueError(f"Granularity {granularity_source} is not supported.")
         return degranularized_corpus
-    
+
     def deprocess(self, processed_corpus: List[Tuple[str]], granularity_source: str) -> str:
         dewindowized_corpus = self.dewindowize(processed_corpus)
         degranularized_corpus = self.degranularize(dewindowized_corpus, granularity_source)
@@ -75,19 +75,21 @@ class PreProcessor:
         granularized_corpus = self.granularize(corpus, source_type, granularity)
         windowed_granularized_corpus = self.windowize(granularized_corpus, window_size)
         return windowed_granularized_corpus
-    
-    def get_window_sized_processed_corpuses(self, corpus: str, source_type: str, granularity: str, window_sizes: List[int]) -> List[dict]:
+
+    def get_window_sized_processed_corpuses(self, corpus: str, source_type: str, granularity: str,
+                                            window_sizes: List[int]) -> List[dict]:
         window_sized_processed_corpus = []
         for window_size in window_sizes:
             processed_corpus = pre_processor.process(corpus, source_type, granularity, window_size)
-            
+
             window_sized_pre_processed_corpus = {
                 "window_size": window_size,
                 "processed_corpus": processed_corpus
             }
-            
-            window_sized_processed_corpus.append(window_sized_pre_processed_corpus)           
-            
+
+            window_sized_processed_corpus.append(window_sized_pre_processed_corpus)
+
         return window_sized_processed_corpus
+
 
 pre_processor = PreProcessor()

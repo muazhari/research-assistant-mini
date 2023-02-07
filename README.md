@@ -6,7 +6,7 @@ Research Assistant Mini App using Streamlit user interface.
 ## Features
 
 - Passage Search (Done)
-- Long Form QA (Not yet implemented)
+- Long Form QA (Done)
 - Document Network (Not yet implemented)
 - Document Search (Not yet implemented)
 
@@ -25,7 +25,7 @@ Research Assistant Mini App using Streamlit user interface.
 2. Get your Ngrok Authentication Token.
 3. Create cell based on below Jupyter Notebook script in Google Colab, Kaggle, or other alternatives.
 
-```python
+```jupyter
 #@title Semantic Search App
 NGROK_TOKEN = "" #@param {type:"string"} 
 
@@ -47,12 +47,12 @@ get_ipython().system_raw(f'ngrok authtoken {NGROK_TOKEN}')
 get_ipython().system_raw('ngrok http 8501 &')
 print("Open public URL:")
 !curl -s http://localhost:4040/api/tunnels | jq ".tunnels[0].public_url"
-!streamlit run ~/semantic-search/app.py
+!streamlit run ~/research-assistant-mini/app.py
 
 !sleep 10000000
 ```
 
-4. Submit your ngrok Authentication Token to `NGROK_TOKEN` coloumn in the cell form.
+4. Submit your ngrok Authentication Token to `NGROK_TOKEN` column in the cell form.
 5. Enable GPU in the Notebook.
 6. Run the cell.
 7. Wait until the setups are done.
