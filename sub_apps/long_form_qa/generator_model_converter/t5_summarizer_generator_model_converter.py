@@ -10,6 +10,6 @@ class T5SummarizerGeneratorModelConverter(BaseGeneratorModelConverter):
     def __call__(
             self, tokenizer: PreTrainedTokenizer, query: str, documents: List[Document], top_k: Optional[int] = None
     ) -> BatchEncoding:
-        conditioned_doc = "<P> " + " <P> ".join([d.content for d in documents])
+        conditioned_doc = " ".join([d.content for d in documents])
         query_and_docs = "question: {} context: {} summary: ".format(query, conditioned_doc)
         return tokenizer(query_and_docs, truncation=True, padding=True, return_tensors="pt")
