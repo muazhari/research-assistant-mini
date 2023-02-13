@@ -26,7 +26,7 @@ Research Assistant Mini App using Streamlit user interface.
 3. Create cell based on below Jupyter Notebook script in Google Colab, Kaggle, or other alternatives.
 
 ```
-#@title Semantic Search App
+#@title Research Assistant Mini App
 NGROK_TOKEN = "" #@param {type:"string"} 
 
 %cd ~
