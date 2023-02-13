@@ -25,13 +25,13 @@ Research Assistant Mini App using Streamlit user interface.
 2. Get your Ngrok Authentication Token.
 3. Create cell based on below Jupyter Notebook script in Google Colab, Kaggle, or other alternatives.
 
-```jupyter
+```
 #@title Semantic Search App
 NGROK_TOKEN = "" #@param {type:"string"} 
 
 %cd ~
 !git clone https://github.com/muazhari/research-assistant-mini.git
-%cd ~/semantic-search/
+%cd ~/research-assistant-mini/
 !git fetch --all
 !git reset --hard origin
 
