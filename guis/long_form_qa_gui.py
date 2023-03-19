@@ -143,7 +143,7 @@ class LongFormQAGUI:
             )
             prompt = st.text_area(
                 label="Enter a prompt.",
-                value="Synthesize a comprehensive answer from the following topk most relevant paragraphs and the given question. Provide a clear long answer from the key points and information presented in the paragraphs. \n\n Paragraphs: $documents \n\n Question: $query \n\n Answer:"
+                value="Synthesize a comprehensive answer from the following topk most relevant paragraphs and the given question. Provide a cleary elaborated long answer from the key points and information presented in the paragraphs. \n\n Paragraphs: $documents \n\n Question: $query \n\n Answer:"
             )
             answer_min_length = None
             answer_max_length = st.number_input(
