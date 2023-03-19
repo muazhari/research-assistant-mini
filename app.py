@@ -16,13 +16,13 @@ class App():
             index=2
         )
 
-        if (sub_app == "document_network"):
+        if sub_app == "document_network":
             pass
-        elif (sub_app == "document_search"):
+        elif sub_app == "document_search":
             pass
-        elif (sub_app == "passage_search"):
+        elif sub_app == "passage_search":
             passage_search_gui.display()
-        elif (sub_app == "long_form_qa"):
+        elif sub_app == "long_form_qa":
             long_form_qa_gui.display()
         else:
             raise ValueError(f"Sub app {sub_app} is not supported.")

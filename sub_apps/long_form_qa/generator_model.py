@@ -1,14 +1,14 @@
-from haystack.nodes import OpenAIAnswerGenerator, Seq2SeqGenerator, BaseGenerator
+from haystack.nodes import OpenAIAnswerGenerator, Seq2SeqGenerator, BaseGenerator, PromptNode, PromptTemplate
 from haystack.nodes.answer_generator.transformers import _BartEli5Converter
 
 from models.lfqa_search_request import LFQARequest
 from sub_apps.long_form_qa.generator_model_converter.base_generator_model_converter import BaseGeneratorModelConverter
+from sub_apps.long_form_qa.generator_model_converter.flan_t5_summarizer_generator_model_converter import \
+    FlanT5SummarizerGeneratorModelConverter
 from sub_apps.long_form_qa.generator_model_converter.parrot_paraphraser_generator_model_converter import \
     ParrotParaphraserGeneratorModelConverter
 from sub_apps.long_form_qa.generator_model_converter.t5_lfqa_generator_model_converter import \
     T5LFQAGeneratorModelConverter
-from sub_apps.long_form_qa.generator_model_converter.flan_t5_summarizer_generator_model_converter import \
-    FlanT5SummarizerGeneratorModelConverter
 
 
 class GeneratorModel:
@@ -46,6 +46,19 @@ class GeneratorModel:
         )
         return generator
 
+    def get_openai_prompt_generator(self, lfqa_request: LFQARequest) -> PromptNode:
+        lfqa_prompt = PromptTemplate(name="lfqa",
+                                     prompt_text=lfqa_request.prompt)
+
+        generator: PromptNode = PromptNode(
+            model_name_or_path=lfqa_request.generator_model,
+            default_prompt_template=lfqa_prompt,
+            max_length=lfqa_request.answer_max_length,
+            api_key=lfqa_request.openai_api_key,
+            use_gpu=True,
+        )
+        return generator
+
     def get_generator(self, lfqa_request: LFQARequest) -> BaseGenerator:
         if lfqa_request.model_format == "seq2seq":
             generator: Seq2SeqGenerator = self.get_seq2seq_generator(
@@ -53,6 +66,10 @@ class GeneratorModel:
             )
         elif lfqa_request.model_format == "openai_answer":
             generator: OpenAIAnswerGenerator = self.get_openai_answer_generator(
+                lfqa_request=lfqa_request,
+            )
+        elif lfqa_request.model_format == "openai_prompt":
+            generator: PromptNode = self.get_openai_prompt_generator(
                 lfqa_request=lfqa_request,
             )
         else:

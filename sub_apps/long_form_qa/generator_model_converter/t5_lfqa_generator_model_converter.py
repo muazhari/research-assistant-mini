@@ -12,4 +12,4 @@ class T5LFQAGeneratorModelConverter(BaseGeneratorModelConverter):
     ) -> BatchEncoding:
         conditioned_doc = "<P> " + " <P> ".join([d.content for d in documents])
         query_and_docs = "question: {} context: {}".format(query, conditioned_doc)
-        return tokenizer([[query_and_docs, "A"]], truncation=True, padding=True, return_tensors="pt")
+        return tokenizer(query_and_docs, truncation=True, padding=True, return_tensors="pt")

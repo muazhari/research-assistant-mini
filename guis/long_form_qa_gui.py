@@ -84,20 +84,30 @@ class LongFormQAGUI:
 
         generator_model_format: Optional[str] = st.radio(
             label="Pick a generator model format.",
-            options=['seq2seq', 'openai_answer'],
+            options=['seq2seq', 'openai_answer', 'openai_prompt'],
             index=0
         )
 
         generator_model: Optional[str] = None
+        prompt: Optional[str] = None
         answer_min_length: Optional[int] = None
         answer_max_length: Optional[int] = None
         answer_max_tokens: Optional[int] = None
         generator_openai_api_key: Optional[str] = None
+
+        open_ai_generator_model = [
+            "text-ada-001",
+            "text-babbage-001",
+            "text-curie-001",
+            "text-davinci-003"
+        ]
+
         if generator_model_format == 'seq2seq':
             generator_model = st.text_input(
                 label="Enter a generator model.",
                 value="google/flan-t5-large"
             )
+            prompt = None
             answer_min_length = st.number_input(
                 label="Enter a minimum length of the answer.",
                 value=50
@@ -109,23 +119,38 @@ class LongFormQAGUI:
             answer_max_tokens = None
             generator_openai_api_key = None
         elif generator_model_format == 'openai_answer':
-            open_ai_generator_model = [
-                "text-ada-001",
-                "text-babbage-001",
-                "text-curie-001",
-                "text-davinci-003"
-            ]
             generator_model = st.radio(
                 label="Enter an openai embedding model.",
                 options=open_ai_generator_model,
                 index=0
             )
+            prompt = None
             answer_min_length = None
             answer_max_length = None
             answer_max_tokens = st.number_input(
                 label="Enter a maximum tokens in the answer.",
-                value=13
+                value=50
             )
+            generator_openai_api_key = st.text_input(
+                label="Enter an OpenAI API key for generator.",
+                value=""
+            )
+        elif generator_model_format == 'openai_prompt':
+            generator_model = st.radio(
+                label="Enter an openai embedding model.",
+                options=open_ai_generator_model,
+                index=0
+            )
+            prompt = st.text_area(
+                label="Enter a prompt.",
+                value="Synthesize a comprehensive answer from the following topk most relevant paragraphs and the given question. Provide a clear long answer from the key points and information presented in the paragraphs. \n\n Paragraphs: $documents \n\n Question: $query \n\n Answer:"
+            )
+            answer_min_length = None
+            answer_max_length = st.number_input(
+                label="Enter a maximum length of the answer.",
+                value=1000
+            )
+            answer_max_tokens = None
             generator_openai_api_key = st.text_input(
                 label="Enter an OpenAI API key for generator.",
                 value=""
@@ -178,7 +203,7 @@ class LongFormQAGUI:
                 f"Enter the end page of the pdf you want to be retrieved (1-{uploaded_file_page_length}).",
                 min_value=1,
                 max_value=uploaded_file_page_length,
-                value=1
+                value=uploaded_file_page_length
             )
 
             split_uploaded_file_name = f'{uploaded_file_name}_split_{start_page}_to_{end_page}.pdf'
@@ -228,6 +253,7 @@ class LongFormQAGUI:
         lfqa_request: LFQARequest = LFQARequest(
             model_format=generator_model_format,
             generator_model=generator_model,
+            prompt=prompt,
             answer_min_length=answer_min_length,
             answer_max_length=answer_max_length,
             answer_max_tokens=answer_max_tokens,
@@ -246,21 +272,40 @@ class LongFormQAGUI:
                 lfqa_request=lfqa_request
             )
 
-            answers_response: list = lfqa_search_response.generative_qa_result["answers"]
-            metadata_response: dict = answers_response[0].meta
-            st.subheader("Output Process Duration")
-            st.write(f"{lfqa_search_response.process_duration} seconds")
+            if lfqa_request.model_format == "openai_prompt":
+                answers_response: list = lfqa_search_response.generative_qa_result["results"]
+                metadata_response: dict = lfqa_search_response.generative_qa_result["documents"]
 
-            st.subheader("Output Content")
-            st.write(f"Answer:")
-            st.write(f"{answers_response[0].answer}")
-            st.write(f"Retrieved documents:")
-            retrieved_documents_df: DataFrame = pd.DataFrame(
-                columns=["Content", "Score"],
-                data=zip(metadata_response["content"],
-                         metadata_response["doc_scores"])
-            )
-            st.table(retrieved_documents_df)
+                st.subheader("Output Process Duration")
+                st.write(f"{lfqa_search_response.process_duration} seconds")
+
+                st.subheader("Output Content")
+                st.write(f"Answer:")
+                st.write(f"{answers_response[0]}")
+                st.write(f"Retrieved documents:")
+                retrieved_documents_df: DataFrame = pd.DataFrame(
+                    columns=["Content", "Score"],
+                    data=[(doc.content, doc.score) for doc in metadata_response]
+                )
+                st.table(retrieved_documents_df)
+
+            else:
+                answers_response: list = lfqa_search_response.generative_qa_result["answers"]
+                metadata_response: dict = answers_response[0].meta
+
+                st.subheader("Output Process Duration")
+                st.write(f"{lfqa_search_response.process_duration} seconds")
+
+                st.subheader("Output Content")
+                st.write(f"Answer:")
+                st.write(f"{answers_response[0].answer}")
+                st.write(f"Retrieved documents:")
+                retrieved_documents_df: DataFrame = pd.DataFrame(
+                    columns=["Content", "Score"],
+                    data=zip(metadata_response["content"],
+                             metadata_response["doc_scores"])
+                )
+                st.table(retrieved_documents_df)
 
 
 long_form_qa_gui = LongFormQAGUI()
