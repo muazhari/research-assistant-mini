@@ -22,10 +22,13 @@ Research Assistant Mini App using Streamlit user interface.
 ## Walkthrough 
 
 ### Local
-1. Get your Open AI API key.
-2. Run `python run.py --server.address 0.0.0.0 --server.port 8501` (Run as Administrator if in Windows).
-3. Open URL `http://localhost:8501` in a browser.
-4. Use the app.
+1. Run `git clone https://github.com/muazhari/research-assistant-mini.git`.
+2. Go to `research-assistant-mini` directory.
+3. Run `pip install -r requirements.txt && pip install farm-haystack[all] txtai[all]`. 
+4. Get your Open AI API key.
+5. Run `python run.py --server.address 0.0.0.0 --server.port 8501` (Run as Administrator if in Windows).
+6. Open URL `http://localhost:8501` in a browser.
+7. Use the app.
 
 ### Jupyter Notebook
 1. Get your Open AI API key.
