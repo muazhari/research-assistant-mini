@@ -25,6 +25,7 @@ Research Assistant Mini App using Streamlit user interface.
 1. Get your Open AI API key.
 2. Run `python run.py --server.address 0.0.0.0 --server.port 8501` (Run as Administrator if in Windows).
 3. Open URL `http://localhost:8501` in a browser.
+4. Use the app.
 
 ### Jupyter Notebook
 1. Get your Open AI API key.
