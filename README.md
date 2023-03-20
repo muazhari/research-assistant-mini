@@ -21,11 +21,16 @@ Research Assistant Mini App using Streamlit user interface.
 
 ## Walkthrough 
 
+### Local
+1. Run `python run.py --server.address 0.0.0.0 --server.port 8501`.
+2. Open URL `http://localhost:8501` in a browser.
+
+### Jupyter Notebook
 1. Get your Open AI API key.
 2. Get your Ngrok Authentication Token.
 3. Create cell based on below Jupyter Notebook script in Google Colab, Kaggle, or other alternatives.
 
-```
+```python
 #@title Research Assistant Mini App
 NGROK_TOKEN = "" #@param {type:"string"} 
 
