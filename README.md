@@ -20,7 +20,8 @@ Research Assistant Mini App using Streamlit user interface.
 [![passage_search_demo](http://img.youtube.com/vi/bu93G6YesaQ/0.jpg)](http://www.youtube.com/watch?v=bu93G6YesaQ)
 
 - Long Form QA
-![long-form_qa_demo](https://user-images.githubusercontent.com/39398937/226294029-7be63e02-6fbe-48a0-9910-f473f4ac5944.png)
+![long-form_qa_demo](https://user-images.githubusercontent.com/39398937/226296763-fa56e300-fd2b-4fa0-8076-293d77ae10bb.png)
+
 
 
 ## Walkthrough 
