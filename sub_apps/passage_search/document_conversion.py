@@ -35,23 +35,23 @@ class DocumentConversion:
         return output_file_path
 
     def corpus_to_pdf(self, passage_search_request: PassageSearchRequest, output_file_path: Path) -> Path:
-        if passage_search_request.source_type == "text":
+        if passage_search_request.corpus_source_type == "text":
             result_output_file_path = self.text_to_pdf(
                 text=passage_search_request.corpus,
                 output_file_path=output_file_path
             )
-        elif passage_search_request.source_type == "file":
+        elif passage_search_request.corpus_source_type == "file":
             result_output_file_path = self.file_to_pdf(
                 input_file_path=Path(passage_search_request.corpus),
                 output_file_path=output_file_path
             )
-        elif passage_search_request.source_type == "web":
+        elif passage_search_request.corpus_source_type == "web":
             result_output_file_path = self.web_to_pdf(
                 url=passage_search_request.corpus,
                 output_file_path=output_file_path
             )
         else:
-            raise ValueError(f"Source type {passage_search_request.source_type} is not supported.")
+            raise ValueError(f"Corpus source type {passage_search_request.corpus_source_type} is not supported.")
 
         return result_output_file_path
 

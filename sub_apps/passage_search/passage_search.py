@@ -19,7 +19,7 @@ class PassageSearch:
     def get_window_sized_documents(self, passage_search_request: PassageSearchRequest) -> List[Document]:
         window_sized_processed_corpuses: List[dict] = pre_processor.get_window_sized_processed_corpuses(
             corpus=passage_search_request.corpus,
-            source_type=passage_search_request.source_type,
+            corpus_source_type=passage_search_request.corpus_source_type,
             granularity=passage_search_request.granularity,
             window_sizes=list(
                 map(int, passage_search_request.window_sizes.split(" ")))

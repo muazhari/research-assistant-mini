@@ -39,7 +39,7 @@ class GeneratorModel:
 
     def get_openai_answer_generator(self, lfqa_request: LFQARequest) -> OpenAIAnswerGenerator:
         generator: OpenAIAnswerGenerator = OpenAIAnswerGenerator(
-            api_key=lfqa_request.openai_api_key,
+            api_key=lfqa_request.api_key,
             model=lfqa_request.generator_model,
             max_tokens=lfqa_request.answer_max_tokens,
             top_k=1,
@@ -54,7 +54,7 @@ class GeneratorModel:
             model_name_or_path=lfqa_request.generator_model,
             default_prompt_template=lfqa_prompt,
             max_length=lfqa_request.answer_max_length,
-            api_key=lfqa_request.openai_api_key,
+            api_key=lfqa_request.api_key,
             use_gpu=True,
         )
         return generator

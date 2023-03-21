@@ -34,14 +34,14 @@ class PreProcessor:
             ValueError(f"Granularity {granularity} is not supported.")
         return granularized_corpus
 
-    def granularize(self, corpus: str, source_type: str, granularity: str) -> List[str]:
+    def granularize(self, corpus: str, corpus_source_type: str, granularity: str) -> List[str]:
         granularized_corpus = None
-        if source_type in ["text"]:
+        if corpus_source_type in ["text"]:
             granularized_corpus = self.segment(corpus, granularity)
-        elif source_type in ["file", "web"]:
+        elif corpus_source_type in ["file", "web"]:
             granularized_corpus = self.textract(corpus, granularity)
         else:
-            raise ValueError(f"Source type {source_type} is not supported.")
+            raise ValueError(f"Source type {corpus_source_type} is not supported.")
         return granularized_corpus
 
     def dewindowize(self, windowed_corpus: List[Tuple[str]]) -> List[str]:
@@ -68,19 +68,19 @@ class PreProcessor:
         deprocessed_corpus = degranularized_corpus
         return deprocessed_corpus
 
-    def windowize(self, corpus: str, window_size: int) -> List[Tuple[str, ...]]:
+    def windowize(self, corpus: List[str], window_size: int) -> List[Tuple[str, ...]]:
         return list(more_itertools.windowed(corpus, window_size))
 
-    def process(self, corpus: str, source_type: str, granularity: str, window_size: int):
-        granularized_corpus = self.granularize(corpus, source_type, granularity)
+    def process(self, corpus: str, corpus_source_type: str, granularity: str, window_size: int):
+        granularized_corpus = self.granularize(corpus, corpus_source_type, granularity)
         windowed_granularized_corpus = self.windowize(granularized_corpus, window_size)
         return windowed_granularized_corpus
 
-    def get_window_sized_processed_corpuses(self, corpus: str, source_type: str, granularity: str,
+    def get_window_sized_processed_corpuses(self, corpus: str, corpus_source_type: str, granularity: str,
                                             window_sizes: List[int]) -> List[dict]:
         window_sized_processed_corpus = []
         for window_size in window_sizes:
-            processed_corpus = pre_processor.process(corpus, source_type, granularity, window_size)
+            processed_corpus = pre_processor.process(corpus, corpus_source_type, granularity, window_size)
 
             window_sized_pre_processed_corpus = {
                 "window_size": window_size,

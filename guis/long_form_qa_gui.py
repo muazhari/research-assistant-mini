@@ -27,49 +27,73 @@ class LongFormQAGUI:
 
         st.subheader("Configurations")
 
-        retriever_model_format: Optional[str] = st.radio(
+        retriever_source_type: Optional[str] = st.radio(
             label="Pick a retriever model format.",
-            options=['dense_passage', 'openai'],
+            options=['local', 'openai'],
             index=0
         )
 
+        retriever: Optional[str] = None
         query_embedding_model: Optional[str] = None
         passage_embedding_model: Optional[str] = None
-        embedding_dimension: Optional[str] = None
-        retriever_openai_api_key: Optional[str] = None
-        if retriever_model_format == 'dense_passage':
-            query_embedding_model = st.text_input(
-                label="Enter a query embedding model.",
-                value="vblagoje/dpr-question_encoder-single-lfqa-wiki"
+        embedding_dimension: Optional[int] = None
+        num_iterations: Optional[int] = None
+        api_key: Optional[str] = None
+        if retriever_source_type == 'local':
+            retriever = st.radio(
+                label="Pick a retriever.",
+                options=['multihop', 'dense_passage'],
+                index=0
             )
-            passage_embedding_model = st.text_input(
-                label="Enter a passage embedding model.",
-                value="vblagoje/dpr-ctx_encoder-single-lfqa-wiki"
-            )
+
+            if retriever == 'multihop':
+                query_embedding_model = passage_embedding_model = st.text_input(
+                    label="Enter an embedding model.",
+                    value="sentence-transformers/all-mpnet-base-v2"
+                )
+            elif retriever == 'dense_passage':
+                query_embedding_model = st.text_input(
+                    label="Enter a query embedding model.",
+                    value="vblagoje/dpr-question_encoder-single-lfqa-wiki"
+                )
+                passage_embedding_model = st.text_input(
+                    label="Enter a passage embedding model.",
+                    value="vblagoje/dpr-ctx_encoder-single-lfqa-wiki"
+                )
+            else:
+                st.error("Please select a right retriever.")
+
             embedding_dimension = st.number_input(
                 label="Enter an embedding dimension.",
-                value=128,
+                value=768
             )
-            retriever_openai_api_key = None
-        elif retriever_model_format == 'openai':
-            open_ai_embedding_model = {
+
+            num_iterations = st.number_input(
+                label="Enter a number of iterations/hops.",
+                value=2
+            )
+
+            api_key = None
+        elif retriever_source_type == 'openai':
+            retriever = "basic"
+            open_ai_model = {
                 "ada": 1024,
-                "babage": 2048,
+                "babbage": 2048,
                 "curie": 4096,
                 "davinci": 12288
             }
             query_embedding_model = passage_embedding_model = st.radio(
-                label="Enter an openai embedding model.",
-                options=open_ai_embedding_model.keys(),
+                label="Enter an embedding model.",
+                options=open_ai_model.keys(),
                 index=0
             )
-            embedding_dimension = open_ai_embedding_model[query_embedding_model]
-            retriever_openai_api_key = st.text_input(
-                label="Enter an OpenAI API key for retriever.",
+            embedding_dimension = open_ai_model[query_embedding_model]
+            api_key = st.text_input(
+                label="Enter an OpenAI API key.",
                 value=""
             )
         else:
-            st.error("Please select a right model format.")
+            st.error("Please select a right retriever source.")
 
         embedding_model: EmbeddingModel = EmbeddingModel(
             query_embedding_model=query_embedding_model,
@@ -122,7 +146,7 @@ class LongFormQAGUI:
             generator_model = st.radio(
                 label="Enter an openai embedding model.",
                 options=open_ai_generator_model,
-                index=0
+                index=3
             )
             prompt = None
             answer_min_length = None
@@ -158,14 +182,15 @@ class LongFormQAGUI:
         else:
             st.error("Please select a right model format.")
 
-        source_type: Optional[str] = st.radio(
+        corpus_source_type: Optional[str] = st.radio(
             label="Pick a source type.",
             options=['file', 'text', 'web'],
-            index=1
+            index=0
         )
 
         corpus: Optional[str] = ""
-        if source_type in ['file']:
+        uploaded_file_path: Optional[Path] = None
+        if corpus_source_type in ['file']:
             uploaded_file = st.file_uploader(
                 label="Upload a file.",
                 type=['pdf'],
@@ -180,7 +205,7 @@ class LongFormQAGUI:
                 corpus = str(document_conversion.file_bytes_to_pdf(
                     uploaded_file.getbuffer(), uploaded_file_path))
                 st.success("File uploaded!")
-        elif source_type in ['text', 'web']:
+        elif corpus_source_type in ['text', 'web']:
             corpus = st.text_area(
                 label="Enter a corpus.",
                 value=""
@@ -188,7 +213,7 @@ class LongFormQAGUI:
         else:
             st.error("Please select a right source type.")
 
-        if corpus != "" and source_type in ['file']:
+        if corpus != "" and corpus_source_type in ['file']:
             uploaded_file_name = os.path.splitext(os.path.basename(corpus))[0]
             uploaded_file_page_length = document_conversion.get_pdf_page_length(
                 corpus)
@@ -237,17 +262,19 @@ class LongFormQAGUI:
         percentage = percentage / 100
 
         passage_search_request: PassageSearchRequest = PassageSearchRequest(
-            source_type=source_type,
+            corpus_source_type=corpus_source_type,
             corpus=corpus,
             query=query,
             granularity=granularity,
             window_sizes=window_sizes,
             percentage=percentage,
-            model_format=retriever_model_format,
+            retriever_source_type=retriever_source_type,
+            retriever=retriever,
             embedding_model=embedding_model,
             embedding_dimension=embedding_dimension,
+            num_iterations=num_iterations,
             similarity_function=similarity_function,
-            openai_api_key=retriever_openai_api_key
+            api_key=api_key
         )
 
         lfqa_request: LFQARequest = LFQARequest(
@@ -257,12 +284,12 @@ class LongFormQAGUI:
             answer_min_length=answer_min_length,
             answer_max_length=answer_max_length,
             answer_max_tokens=answer_max_tokens,
-            openai_api_key=generator_openai_api_key
+            api_key=generator_openai_api_key
         )
 
-        passage_search_request_dict: dict = passage_search_request.dict(exclude={"openai_api_key"})
+        passage_search_request_dict: dict = passage_search_request.dict(exclude={"api_key"})
         lfqa_request_dict: dict = lfqa_request.dict(
-            exclude={"openai_api_key", "answer_min_length", "answer_max_length", "answer_max_tokens"})
+            exclude={"api_key", "answer_min_length", "answer_max_length", "answer_max_tokens"})
         if all(value not in [None, ""] for value in
                list(passage_search_request_dict.values())
                + list(lfqa_request_dict.values())

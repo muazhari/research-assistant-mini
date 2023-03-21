@@ -30,45 +30,72 @@ class PassageSearchGUI:
 
         st.subheader("Configurations")
 
-        model_format: Optional[str] = st.radio(
-            label="Pick a model format.",
-            options=['sentence_transformers', 'openai'],
+        retriever_source_type: Optional[str] = st.radio(
+            label="Pick a retriever source.",
+            options=['local', 'openai'],
             index=0
         )
 
+        retriever: Optional[str] = None
         query_embedding_model: Optional[str] = None
         passage_embedding_model: Optional[str] = None
-        embedding_dimension: Optional[str] = None
-        openai_api_key: Optional[str] = None
-        if model_format == 'sentence_transformers':
-            query_embedding_model = passage_embedding_model = st.text_input(
-                label="Enter an embedding model.",
-                value="sentence-transformers/multi-qa-mpnet-base-cos-v1"
+        embedding_dimension: Optional[int] = None
+        api_key: Optional[str] = None
+        if retriever_source_type == 'local':
+            retriever = st.radio(
+                label="Pick a retriever.",
+                options=['multihop', 'dense_passage'],
+                index=0
             )
+
+            if retriever == 'multihop':
+                query_embedding_model = passage_embedding_model = st.text_input(
+                    label="Enter an embedding model.",
+                    value="sentence-transformers/all-mpnet-base-v2"
+                )
+            elif retriever == 'dense_passage':
+                query_embedding_model = st.text_input(
+                    label="Enter a query embedding model.",
+                    value="facebook/dpr-question_encoder-multiset-base"
+                )
+                passage_embedding_model = st.text_input(
+                    label="Enter a passage embedding model.",
+                    value="facebook/dpr-ctx_encoder-multiset-base"
+                )
+            else:
+                st.error("Please select a right retriever.")
+
             embedding_dimension = st.number_input(
                 label="Enter an embedding dimension.",
-                value=768,
+                value=768
             )
-            openai_api_key = None
-        elif model_format == 'openai':
+
+            num_iterations = st.number_input(
+                label="Enter a number of iterations/hops.",
+                value=2
+            )
+
+            api_key = None
+        elif retriever_source_type == 'openai':
+            retriever = "basic"
             open_ai_model = {
                 "ada": 1024,
-                "babage": 2048,
+                "babbage": 2048,
                 "curie": 4096,
                 "davinci": 12288
             }
             query_embedding_model = passage_embedding_model = st.radio(
                 label="Enter an embedding model.",
                 options=open_ai_model.keys(),
-                index=0
+                index=3
             )
             embedding_dimension = open_ai_model[query_embedding_model]
-            openai_api_key = st.text_input(
+            api_key = st.text_input(
                 label="Enter an OpenAI API key.",
                 value=""
             )
         else:
-            st.error("Please select a right model format.")
+            st.error("Please select a right retriever source.")
 
         embedding_model = EmbeddingModel(
             query_embedding_model=query_embedding_model,
@@ -78,18 +105,18 @@ class PassageSearchGUI:
         similarity_function = st.radio(
             label="Pick an embedding similarity function.",
             options=['cosine', 'dot_product'],
-            index=0
+            index=1
         )
 
-        source_type = st.radio(
-            label="Pick a source type.",
+        corpus_source_type = st.radio(
+            label="Pick a corpus source type.",
             options=['file', 'text', 'web'],
-            index=1
+            index=0
         )
 
         corpus: Optional[str] = None
         uploaded_file_path: Optional[Path] = None
-        if source_type in ['file']:
+        if corpus_source_type in ['file']:
             uploaded_file = st.file_uploader(
                 label="Upload a file.",
                 type=['pdf'],
@@ -103,7 +130,7 @@ class PassageSearchGUI:
                 uploaded_file_path = self.STREAMLIT_STATIC_PATH / uploaded_file_name
                 corpus = str(document_conversion.file_bytes_to_pdf(uploaded_file.getbuffer(), uploaded_file_path))
                 st.success("File uploaded!")
-        elif source_type in ['text', 'web']:
+        elif corpus_source_type in ['text', 'web']:
             corpus = st.text_area(
                 label="Enter a corpus.",
                 value=""
@@ -111,7 +138,7 @@ class PassageSearchGUI:
         else:
             st.error("Please select a right source type.")
 
-        if corpus is not None and source_type in ['file']:
+        if corpus is not None and corpus_source_type in ['file']:
             uploaded_file_name = os.path.splitext(os.path.basename(corpus))[0]
             uploaded_file_page_length = document_conversion.get_pdf_page_length(
                 corpus)
@@ -160,20 +187,22 @@ class PassageSearchGUI:
         percentage = percentage / 100
 
         passage_search_request: PassageSearchRequest = PassageSearchRequest(
-            source_type=source_type,
+            corpus_source_type=corpus_source_type,
             corpus=corpus,
             query=query,
             granularity=granularity,
             window_sizes=window_sizes,
             percentage=percentage,
-            model_format=model_format,
+            retriever_source_type=retriever_source_type,
+            retriever=retriever,
             embedding_model=embedding_model,
             embedding_dimension=embedding_dimension,
+            num_iterations=num_iterations,
             similarity_function=similarity_function,
-            api_key=openai_api_key
+            api_key=api_key
         )
 
-        passage_search_request_dict: dict = passage_search_request.dict(exclude={"openai_api_key"})
+        passage_search_request_dict: dict = passage_search_request.dict(exclude={"api_key"})
         if all(value not in [None, ""] for value in passage_search_request_dict.values()):
             passage_search_response: PassageSearchResponse = passage_search.search(
                 passage_search_request=passage_search_request
@@ -182,7 +211,7 @@ class PassageSearchGUI:
             result_windowed_documents: list = passage_search_response.retrieval_result["documents"]
             result_documents = pre_processor.granularize(
                 corpus=passage_search_request.corpus,
-                source_type=passage_search_request.source_type,
+                corpus_source_type=passage_search_request.corpus_source_type,
                 granularity=passage_search_request.granularity
             )
 

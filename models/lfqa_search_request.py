@@ -10,4 +10,4 @@ class LFQARequest(BaseModel):
     answer_min_length: Optional[int]
     answer_max_length: Optional[int]
     answer_max_tokens: Optional[int]
-    openai_api_key: Optional[str]
+    api_key: Optional[str]
