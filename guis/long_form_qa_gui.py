@@ -43,7 +43,7 @@ class LongFormQAGUI:
             retriever = st.radio(
                 label="Pick a retriever.",
                 options=['multihop', 'dense_passage'],
-                index=0
+                index=1
             )
 
             if retriever == 'multihop':
@@ -65,7 +65,7 @@ class LongFormQAGUI:
 
             embedding_dimension = st.number_input(
                 label="Enter an embedding dimension.",
-                value=768
+                value=128
             )
 
             num_iterations = st.number_input(
@@ -167,7 +167,7 @@ class LongFormQAGUI:
             )
             prompt = st.text_area(
                 label="Enter a prompt.",
-                value="Synthesize a comprehensive answer from the following topk most relevant paragraphs and the given question. Provide a clearly elaborated long answer from the key points and information presented in the paragraphs. Explain why irrelevant if the answers and/or paragraphs are irrelevant to the question. \n\n Paragraphs: $documents \n\n Question: $query \n\n Answer:"
+                value="Synthesize a comprehensive answer from the following topk most relevant paragraphs and the given question. Provide a clearly elaborated long answer from the key points and information presented in the paragraphs. Explain why irrelevant if the paragraphs are irrelevant to the question. \n\n Paragraphs: $documents \n\n Question: $query \n\n Answer:"
             )
             answer_min_length = None
             answer_max_length = st.number_input(
