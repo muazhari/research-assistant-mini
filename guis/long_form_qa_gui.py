@@ -188,7 +188,7 @@ class LongFormQAGUI:
             index=0
         )
 
-        corpus: Optional[str] = ""
+        corpus: str = ""
         uploaded_file_path: Optional[Path] = None
         if corpus_source_type in ['file']:
             uploaded_file = st.file_uploader(
