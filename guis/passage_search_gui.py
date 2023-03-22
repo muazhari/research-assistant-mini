@@ -40,6 +40,7 @@ class PassageSearchGUI:
         query_embedding_model: Optional[str] = None
         passage_embedding_model: Optional[str] = None
         embedding_dimension: Optional[int] = None
+        num_iterations: Optional[int] = None
         api_key: Optional[str] = None
         if retriever_source_type == 'local':
             retriever = st.radio(
