@@ -167,7 +167,7 @@ class LongFormQAGUI:
             )
             prompt = st.text_area(
                 label="Enter a prompt.",
-                value="Synthesize a comprehensive answer from the following topk most relevant paragraphs and the given question. Provide a clearly elaborated long answer from the key points and information presented in the paragraphs. \n\n Paragraphs: $documents \n\n Question: $query \n\n Answer:"
+                value="Synthesize a comprehensive answer from the following topk most relevant paragraphs and the given question. Provide a clearly elaborated long answer from the key points and information presented in the paragraphs. Say irrelevant if the answers and paragraphs are irrelevant to the question. \n\n Paragraphs: $documents \n\n Question: $query \n\n Answer:"
             )
             answer_min_length = None
             answer_max_length = st.number_input(
@@ -299,9 +299,14 @@ class LongFormQAGUI:
                 lfqa_request=lfqa_request
             )
 
+            print(lfqa_search_response.generative_qa_result.keys())
+            print(lfqa_search_response.generative_qa_result)
+
+            metadata_response: dict = lfqa_search_response.generative_qa_result["_debug"]["Retriever"]["output"][
+                "documents"]
+
             if lfqa_request.model_format == "openai_prompt":
                 answers_response: list = lfqa_search_response.generative_qa_result["results"]
-                metadata_response: dict = lfqa_search_response.generative_qa_result["documents"]
 
                 st.subheader("Output Process Duration")
                 st.write(f"{lfqa_search_response.process_duration} seconds")
@@ -318,7 +323,6 @@ class LongFormQAGUI:
 
             else:
                 answers_response: list = lfqa_search_response.generative_qa_result["answers"]
-                metadata_response: dict = answers_response[0].meta
 
                 st.subheader("Output Process Duration")
                 st.write(f"{lfqa_search_response.process_duration} seconds")
@@ -329,8 +333,7 @@ class LongFormQAGUI:
                 st.write(f"Retrieved documents:")
                 retrieved_documents_df: DataFrame = pd.DataFrame(
                     columns=["Content", "Score"],
-                    data=zip(metadata_response["content"],
-                             metadata_response["doc_scores"])
+                    data=[(doc.content, doc.score) for doc in metadata_response]
                 )
                 st.table(retrieved_documents_df)
 

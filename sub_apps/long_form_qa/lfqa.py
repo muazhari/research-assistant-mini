@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 from typing import List
 
-from haystack.nodes import EmbeddingRetriever, BaseGenerator
+from haystack import Pipeline
+from haystack.nodes import EmbeddingRetriever, BaseGenerator, Shaper
 from haystack.pipelines import GenerativeQAPipeline
 from haystack.schema import Document
 
@@ -26,18 +27,33 @@ class LFQA:
             documents=window_sized_documents
         )
 
+        shaper = Shaper(
+            func="join_documents",
+            inputs={"documents": "documents"},
+            outputs=["documents"]
+        )
+
         generator: BaseGenerator = generator_model.get_generator(
             lfqa_request=lfqa_request
         )
 
-        generative_qa_pipeline: GenerativeQAPipeline = GenerativeQAPipeline(
-            retriever=retriever,
-            generator=generator,
-        )
+        if lfqa_request.model_format == "openai_prompt":
+            pipeline = Pipeline()
+            pipeline.add_node(component=retriever, name="Retriever", inputs=["Query"])
+            pipeline.add_node(component=shaper, name="Shaper", inputs=["Retriever"])
+            pipeline.add_node(component=generator, name="Prompter", inputs=["Shaper"])
 
-        generative_qa_result: dict = generative_qa_pipeline.run(
+        else:
+            pipeline = GenerativeQAPipeline(
+                retriever=retriever,
+                generator=generator,
+            )
+
+        generative_qa_result: dict = pipeline.run(
             query=passage_search_request.query,
-            params={"Retriever": {"top_k": int(passage_search_request.percentage * len(window_sized_documents))}},
+            params={
+                "Retriever": {"top_k": int(passage_search_request.percentage * len(window_sized_documents))},
+            },
             debug=True
         )
 
