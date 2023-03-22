@@ -85,7 +85,7 @@ class LongFormQAGUI:
             query_embedding_model = passage_embedding_model = st.radio(
                 label="Enter an embedding model.",
                 options=open_ai_model.keys(),
-                index=0
+                index=3
             )
             embedding_dimension = open_ai_model[query_embedding_model]
             api_key = st.text_input(
