@@ -174,7 +174,7 @@ class PassageSearchGUI:
 
         window_sizes: Optional[str] = st.text_input(
             label='Enter a list of window sizes that seperated by a space.',
-            value='1'
+            value='1 3 5'
         )
 
         percentage: Optional[float] = st.slider(
