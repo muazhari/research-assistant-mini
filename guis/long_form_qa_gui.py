@@ -144,7 +144,7 @@ class LongFormQAGUI:
             generator_openai_api_key = None
         elif generator_model_format == 'openai_answer':
             generator_model = st.radio(
-                label="Enter an openai embedding model.",
+                label="Enter an openai generator model.",
                 options=open_ai_generator_model,
                 index=3
             )
@@ -161,9 +161,9 @@ class LongFormQAGUI:
             )
         elif generator_model_format == 'openai_prompt':
             generator_model = st.radio(
-                label="Enter an openai embedding model.",
+                label="Enter an openai generator model.",
                 options=open_ai_generator_model,
-                index=0
+                index=3
             )
             prompt = st.text_area(
                 label="Enter a prompt.",

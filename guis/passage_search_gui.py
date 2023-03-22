@@ -115,7 +115,7 @@ class PassageSearchGUI:
             index=0
         )
 
-        corpus: Optional[str] = None
+        corpus: Optional[str] = ""
         uploaded_file_path: Optional[Path] = None
         if corpus_source_type in ['file']:
             uploaded_file = st.file_uploader(
