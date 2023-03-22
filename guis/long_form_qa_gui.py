@@ -167,7 +167,7 @@ class LongFormQAGUI:
             )
             prompt = st.text_area(
                 label="Enter a prompt.",
-                value="Synthesize a comprehensive answer from the following topk most relevant paragraphs and the given question. Provide a clearly elaborated long answer from the key points and information presented in the paragraphs. Say irrelevant if the answers and paragraphs are irrelevant to the question. \n\n Paragraphs: $documents \n\n Question: $query \n\n Answer:"
+                value="Synthesize a comprehensive answer from the following topk most relevant paragraphs and the given question. Provide a clearly elaborated long answer from the key points and information presented in the paragraphs. Explain why irrelevant if the answers and/or paragraphs are irrelevant to the question. \n\n Paragraphs: $documents \n\n Question: $query \n\n Answer:"
             )
             answer_min_length = None
             answer_max_length = st.number_input(
@@ -298,9 +298,6 @@ class LongFormQAGUI:
                 passage_search_request=passage_search_request,
                 lfqa_request=lfqa_request
             )
-
-            print(lfqa_search_response.generative_qa_result.keys())
-            print(lfqa_search_response.generative_qa_result)
 
             metadata_response: dict = lfqa_search_response.generative_qa_result["_debug"]["Retriever"]["output"][
                 "documents"]
