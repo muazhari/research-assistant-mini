@@ -247,8 +247,11 @@ class LongFormQAGUI:
         )
         lfqa_request_dict: dict = self.lfqa_request.dict(
             exclude={"api_key", "answer_min_length", "answer_max_length", "answer_max_tokens",
-                     "generator_model_source_type", "prompt"}
+                     "num_iterations", "generator_model_source_type", "prompt"}
         )
+
+        print(passage_search_request_dict)
+        print(lfqa_request_dict)
 
         if all(value not in [None, ""] for value in
                list(passage_search_request_dict.values())
