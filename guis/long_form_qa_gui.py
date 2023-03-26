@@ -53,6 +53,11 @@ class LongFormQAGUI:
                     label="Enter an embedding dimension.",
                     value=768
                 )
+                self.passage_search_request.num_iterations = st.number_input(
+                    label="Enter a number of iterations/hops.",
+                    value=2
+                )
+
             elif self.passage_search_request.retriever == 'dense_passage':
                 self.passage_search_request.embedding_model.query_embedding_model = st.text_input(
                     label="Enter a query embedding model.",
@@ -68,13 +73,8 @@ class LongFormQAGUI:
                 )
             else:
                 st.error("Please select a right retriever.")
-
-            self.passage_search_request.num_iterations = st.number_input(
-                label="Enter a number of iterations/hops.",
-                value=2
-            )
-
             self.passage_search_request.api_key = None
+
         elif self.passage_search_request.retriever_source_type == 'openai':
             self.passage_search_request.retriever = "basic"
             open_ai_model = {
