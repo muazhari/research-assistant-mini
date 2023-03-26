@@ -49,6 +49,10 @@ class LongFormQAGUI:
                     label="Enter an embedding model.",
                     value="sentence-transformers/all-mpnet-base-v2"
                 )
+                self.passage_search_request.embedding_dimension = st.number_input(
+                    label="Enter an embedding dimension.",
+                    value=768
+                )
             elif self.passage_search_request.retriever == 'dense_passage':
                 self.passage_search_request.embedding_model.query_embedding_model = st.text_input(
                     label="Enter a query embedding model.",
@@ -58,13 +62,12 @@ class LongFormQAGUI:
                     label="Enter a passage embedding model.",
                     value="vblagoje/dpr-ctx_encoder-single-lfqa-wiki"
                 )
+                self.passage_search_request.embedding_dimension = st.number_input(
+                    label="Enter an embedding dimension.",
+                    value=128
+                )
             else:
                 st.error("Please select a right retriever.")
-
-            self.passage_search_request.embedding_dimension = st.number_input(
-                label="Enter an embedding dimension.",
-                value=128
-            )
 
             self.passage_search_request.num_iterations = st.number_input(
                 label="Enter a number of iterations/hops.",
