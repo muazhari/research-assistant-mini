@@ -45,7 +45,7 @@ class LongFormQAGUI:
             )
 
             if self.passage_search_request.retriever == 'multihop':
-                self.passage_search_request.embedding_model.query_embedding_model = self.passage_search_request.embedding_model.passage_embedding_model = st.text_input(
+                self.passage_search_request.embedding_model.query_embedding_model = self.passage_search_request.embedding_model.embedding_model.passage_embedding_model = st.text_input(
                     label="Enter an embedding model.",
                     value="sentence-transformers/all-mpnet-base-v2"
                 )
