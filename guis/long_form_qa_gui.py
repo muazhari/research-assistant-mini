@@ -45,7 +45,7 @@ class LongFormQAGUI:
             )
 
             if self.passage_search_request.retriever == 'multihop':
-                self.passage_search_request.embedding_model.query_embedding_model = self.passage_search_request.embedding_model.embedding_model.passage_embedding_model = st.text_input(
+                self.passage_search_request.embedding_model.query_embedding_model = self.passage_search_request.embedding_model.passage_embedding_model = st.text_input(
                     label="Enter an embedding model.",
                     value="sentence-transformers/all-mpnet-base-v2"
                 )
@@ -83,13 +83,13 @@ class LongFormQAGUI:
                 "curie": 4096,
                 "davinci": 12288
             }
-            self.passage_search_request.query_embedding_model = self.passage_search_request.passage_embedding_model = st.radio(
+            self.passage_search_request.embedding_model.query_embedding_model = self.passage_search_request.embedding_model.passage_embedding_model = st.radio(
                 label="Enter an embedding model.",
                 options=open_ai_model.keys(),
                 index=3
             )
             self.passage_search_request.embedding_dimension = open_ai_model[
-                self.passage_search_request.query_embedding_model]
+                self.passage_search_request.embedding_model.query_embedding_model]
             self.passage_search_request.api_key = st.text_input(
                 label="Enter an OpenAI API key.",
                 value=""
