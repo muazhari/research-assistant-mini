@@ -39,7 +39,7 @@ Research Assistant Mini App using Streamlit user interface.
 ### Jupyter Notebook
 1. Get your Open AI API key.
 2. Get your Ngrok Authentication Token.
-3. Create cell based on below Jupyter Notebook script in Google Colab, Kaggle, or other alternatives.
+3. Create cell based on below Jupyter Notebook script in Kaggle, or other alternatives.
 
 ```python
 #@title Research Assistant Mini App
