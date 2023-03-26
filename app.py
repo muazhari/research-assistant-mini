@@ -4,11 +4,12 @@ from guis.long_form_qa_gui import long_form_qa_gui
 from guis.passage_search_gui import passage_search_gui
 
 
-class App():
+class App:
     def __init__(self) -> None:
         pass
 
     def display(self) -> None:
+
         sub_app = st.sidebar.radio(
             label="Select a sub app.",
             options=["document_network", "document_search",

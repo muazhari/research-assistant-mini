@@ -37,7 +37,7 @@ class LFQA:
             lfqa_request=lfqa_request
         )
 
-        if lfqa_request.model_format == "openai_prompt":
+        if lfqa_request.generator_model_format == "openai_prompt":
             pipeline = Pipeline()
             pipeline.add_node(component=retriever, name="Retriever", inputs=["Query"])
             pipeline.add_node(component=shaper, name="Shaper", inputs=["Retriever"])

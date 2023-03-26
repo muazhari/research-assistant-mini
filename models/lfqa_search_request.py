@@ -4,8 +4,9 @@ from pydantic import BaseModel
 
 
 class LFQARequest(BaseModel):
-    model_format: str
-    generator_model: str
+    generator_model_format: Optional[str]
+    generator_model: Optional[str]
+    generator_model_source_type: Optional[str]
     prompt: Optional[str]
     answer_min_length: Optional[int]
     answer_max_length: Optional[int]

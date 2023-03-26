@@ -6,16 +6,16 @@ from models.embedding_model import EmbeddingModel
 
 
 class PassageSearchRequest(BaseModel):
-    corpus_source_type: str
-    corpus: str
-    query: str
-    granularity: str
-    window_sizes: str
-    percentage: float
-    retriever_source_type: str
-    retriever: str
-    embedding_model: EmbeddingModel
-    embedding_dimension: int
-    num_iterations: int
-    similarity_function: str
+    corpus_source_type: Optional[str]
+    corpus: Optional[str]
+    query: Optional[str]
+    granularity: Optional[str]
+    window_sizes: Optional[str]
+    percentage: Optional[float]
+    retriever_source_type: Optional[str]
+    retriever: Optional[str]
+    embedding_model: Optional[EmbeddingModel]
+    embedding_dimension: Optional[int]
+    num_iterations: Optional[int]
+    similarity_function: Optional[str]
     api_key: Optional[str]
