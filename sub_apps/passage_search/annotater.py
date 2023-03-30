@@ -6,7 +6,7 @@ from typing import List
 from txtmarker.factory import Factory
 
 
-class Annotater():
+class Annotater:
 
     def annotate(self, labels: List[str], documents: List[str], input_file_path: Path, output_file_path: Path,
                  overwrite: bool = True) -> Path:

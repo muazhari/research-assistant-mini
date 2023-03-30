@@ -25,8 +25,8 @@ class DocumentConversion:
         return output_file_path
 
     def file_to_pdf(self, input_file_path: Path, output_file_path: Path) -> Path:
-        with open(input_file_path, "rb") as i_f:
-            input_file_bytes = i_f.read()
+        with open(input_file_path, "rb") as input_file:
+            input_file_bytes = input_file.read()
             if input_file_path.suffix == ".pdf":
                 with open(output_file_path, "wb") as o_f:
                     o_f.write(input_file_bytes)
@@ -56,14 +56,10 @@ class DocumentConversion:
         return result_output_file_path
 
     def split_pdf_page(self, start_page: int, end_page: int, input_file_path: Path, output_file_path: Path) -> Path:
-        pdf_reader = PdfReader(input_file_path)
-        pdf_writer = PdfWriter(output_file_path)
-
-        for page_num in range(start_page - 1, end_page):
-            pdf_writer.addpage(pdf_reader.pages[page_num])
-
-        pdf_writer.write()
-
+        input_pdf_reader = PdfReader(input_file_path)
+        output_pdf_writer = PdfWriter(output_file_path)
+        output_pdf_writer.addpages(input_pdf_reader.pages[start_page - 1:end_page])
+        output_pdf_writer.write()
         return output_file_path
 
     def file_bytes_to_pdf(self, file_bytes: bytes, output_file_path: Path) -> Path:
@@ -72,8 +68,8 @@ class DocumentConversion:
         return output_file_path
 
     def get_pdf_page_length(self, input_file_path: Path) -> int:
-        pdf_reader = PdfReader(input_file_path)
-        pdf_page_length = len(pdf_reader.pages)
+        input_pdf_reader = PdfReader(input_file_path)
+        pdf_page_length = len(input_pdf_reader.pages)
         return pdf_page_length
 
 

@@ -27,7 +27,7 @@ Research Assistant Mini App using Streamlit user interface.
 ## Walkthrough 
 
 ### Local
-1. Install [JDK 8](https://www.oracle.com/id/java/technologies/javase/javase8-archive-downloads.html) .
+1. Install [JDK 8](https://www.oracle.com/id/java/technologies/javase/javase8-archive-downloads.html) & Apache Tika (via chocolatey or apt).
 2. Run `git clone https://github.com/muazhari/research-assistant-mini.git`.
 3. Go to `research-assistant-mini` directory.
 4. Run `pip install -r requirements.txt && pip install farm-haystack[all] txtai[all]`. 
