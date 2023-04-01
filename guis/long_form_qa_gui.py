@@ -121,7 +121,7 @@ class LongFormQAGUI:
             )
             self.lfqa_request.answer_max_length = st.number_input(
                 label="Enter a maximum length of the answer.",
-                value=1000
+                value=800
             )
             self.lfqa_request.answer_max_tokens = None
             self.lfqa_request.api_key = None
@@ -157,7 +157,7 @@ class LongFormQAGUI:
             self.lfqa_request.answer_min_length = None
             self.lfqa_request.answer_max_length = st.number_input(
                 label="Enter a maximum length of the answer.",
-                value=1000
+                value=800
             )
             self.lfqa_request.answer_max_tokens = None
         else:
