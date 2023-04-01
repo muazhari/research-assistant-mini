@@ -58,11 +58,11 @@ class PassageSearchGUI:
             elif self.passage_search_request.retriever == 'dense_passage':
                 self.passage_search_request.embedding_model.query_embedding_model = st.text_input(
                     label="Enter a query embedding model.",
-                    value="facebook/dpr-question_encoder-multiset-base"
+                    value="vblagoje/dpr-question_encoder-single-lfqa-wiki"
                 )
                 self.passage_search_request.embedding_model.passage_embedding_model = st.text_input(
                     label="Enter a passage embedding model.",
-                    value="facebook/dpr-ctx_encoder-multiset-base"
+                    value="vblagoje/dpr-ctx_encoder-single-lfqa-wiki"
                 )
                 self.passage_search_request.embedding_dimension = st.number_input(
                     label="Enter an embedding dimension.",
