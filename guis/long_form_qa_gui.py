@@ -139,7 +139,7 @@ class LongFormQAGUI:
                 )
                 self.lfqa_request.generator_model = st.text_input(
                     label="Enter a generator model.",
-                    value="text-davinci-003"
+                    value="gpt-3.5-turbo"
                 )
             elif self.lfqa_request.generator_model_source_type == 'local':
                 self.lfqa_request.api_key = None
@@ -152,7 +152,7 @@ class LongFormQAGUI:
 
             self.lfqa_request.prompt = st.text_area(
                 label="Enter a prompt.",
-                value="Synthesize a comprehensive answer from the following topk most relevant paragraphs and the given question. Provide an elaborated long answer from the key points and information in the paragraphs. Say irrelevant if the paragraphs are irrelevant to the question, then explain why it is irrelevant. \n\n Paragraphs: $documents \n\n Question: $query \n\n Answer:"
+                value="Synthesize a comprehensive answer from the following topk most relevant paragraphs and the given question. Provide an elaborated long answer from the key points and information in the paragraphs. Say irrelevant if the paragraphs are irrelevant to the question, then explain why it is irrelevant. \n\n Paragraphs: {join(documents)} \n\n Question: {query} \n\n Answer:"
             )
             self.lfqa_request.answer_min_length = None
             self.lfqa_request.answer_max_length = st.number_input(
@@ -261,16 +261,15 @@ class LongFormQAGUI:
 
             metadata_response: dict = lfqa_search_response.generative_qa_result["_debug"]["Retriever"]["output"][
                 "documents"]
+            answers_response: list = lfqa_search_response.generative_qa_result["answers"]
 
             if self.lfqa_request.generator_model_format == "llm_prompt":
-                answers_response: list = lfqa_search_response.generative_qa_result["results"]
-
                 st.subheader("Output Process Duration")
                 st.write(f"{lfqa_search_response.process_duration} seconds")
 
                 st.subheader("Output Content")
                 st.write(f"Answer:")
-                st.write(f"{answers_response[0]}")
+                st.write(f"{answers_response[0].answer}")
                 st.write(f"Retrieved documents:")
                 retrieved_documents_df: DataFrame = pd.DataFrame(
                     columns=["Content", "Score"],
@@ -279,8 +278,6 @@ class LongFormQAGUI:
                 st.table(retrieved_documents_df)
 
             elif self.lfqa_request.generator_model_format == "seq2seq":
-                answers_response: list = lfqa_search_response.generative_qa_result["answers"]
-
                 st.subheader("Output Process Duration")
                 st.write(f"{lfqa_search_response.process_duration} seconds")
 

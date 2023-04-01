@@ -1,4 +1,4 @@
-from haystack.nodes import Seq2SeqGenerator, BaseGenerator, PromptNode, PromptTemplate
+from haystack.nodes import Seq2SeqGenerator, BaseGenerator, PromptNode, PromptTemplate, AnswerParser
 from haystack.nodes.answer_generator.transformers import _BartEli5Converter
 
 from models.lfqa_search_request import LFQARequest
@@ -40,7 +40,8 @@ class GeneratorModel:
     def get_llm_prompt_generator(self, lfqa_request: LFQARequest) -> PromptNode:
         lfqa_prompt = PromptTemplate(
             name="lfqa",
-            prompt_text=lfqa_request.prompt
+            prompt_text=lfqa_request.prompt,
+            output_parser=AnswerParser()
         )
 
         generator: PromptNode = PromptNode(

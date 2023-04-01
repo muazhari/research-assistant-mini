@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 from typing import List
 
-from haystack import Pipeline
 from haystack.nodes import EmbeddingRetriever, BaseGenerator, Shaper
 from haystack.pipelines import GenerativeQAPipeline
 from haystack.schema import Document
@@ -37,17 +36,10 @@ class LFQA:
             lfqa_request=lfqa_request
         )
 
-        if lfqa_request.generator_model_format == "openai_prompt":
-            pipeline = Pipeline()
-            pipeline.add_node(component=retriever, name="Retriever", inputs=["Query"])
-            pipeline.add_node(component=shaper, name="Shaper", inputs=["Retriever"])
-            pipeline.add_node(component=generator, name="Prompter", inputs=["Shaper"])
-
-        else:
-            pipeline = GenerativeQAPipeline(
-                retriever=retriever,
-                generator=generator,
-            )
+        pipeline = GenerativeQAPipeline(
+            retriever=retriever,
+            generator=generator,
+        )
 
         generative_qa_result: dict = pipeline.run(
             query=passage_search_request.query,
