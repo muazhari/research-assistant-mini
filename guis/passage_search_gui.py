@@ -107,8 +107,8 @@ class PassageSearchGUI:
 
         self.passage_search_request.sparse_retriever = st.radio(
             label="Pick a sparse retriever.",
-            options=['bm25', 'tfidf'],
-            index=0
+            options=['tfidf', 'bm25'],
+            index=1
         )
 
         if self.passage_search_request.sparse_retriever == 'bm25':
