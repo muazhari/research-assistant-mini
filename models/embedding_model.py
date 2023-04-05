@@ -4,5 +4,5 @@ from pydantic import BaseModel
 
 
 class EmbeddingModel(BaseModel):
-    query_embedding_model: Optional[str]
-    passage_embedding_model: Optional[str]
+    query_model: Optional[str]
+    passage_model: Optional[str]

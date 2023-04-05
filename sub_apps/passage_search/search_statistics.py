@@ -26,10 +26,10 @@ class SearchStatistics:
 
         return result_document_indexes_with_overlapped_scores
 
-    def get_selected_labels(self, document_indexes_with_overlapped_scores: dict[int, dict], percentage: float) -> list:
+    def get_selected_labels(self, document_indexes_with_overlapped_scores: dict[int, dict], top_k: float) -> list:
         items = document_indexes_with_overlapped_scores.items()
         selected_labels = []
-        max_selection = int(percentage * len(items))
+        max_selection = top_k
         count_selection = 0
         for index, stats in sorted(items, key=lambda item: item[1]["score_mean"], reverse=True):
             if count_selection >= max_selection:
@@ -40,11 +40,11 @@ class SearchStatistics:
 
         return selected_labels
 
-    def get_selected_documents(self, document_indexes_with_overlapped_scores: dict[int, dict], percentage: float,
+    def get_selected_documents(self, document_indexes_with_overlapped_scores: dict[int, dict], top_k: float,
                                source_documents: list[str]) -> list[str]:
         items = document_indexes_with_overlapped_scores.items()
         selected_documents = []
-        max_selection = int(percentage * len(items))
+        max_selection = top_k
         count_selection = 0
         for index, stats in sorted(items, key=lambda item: item[1]["score_mean"], reverse=True):
             if count_selection >= max_selection:

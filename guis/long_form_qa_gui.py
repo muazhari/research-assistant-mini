@@ -38,14 +38,14 @@ class LongFormQAGUI:
         )
 
         if self.passage_search_request.retriever_source_type == 'local':
-            self.passage_search_request.retriever = st.radio(
-                label="Pick a retriever.",
+            self.passage_search_request.dense_retriever = st.radio(
+                label="Pick a dense retriever.",
                 options=['multihop', 'dense_passage'],
                 index=1
             )
 
-            if self.passage_search_request.retriever == 'multihop':
-                self.passage_search_request.embedding_model.query_embedding_model = self.passage_search_request.embedding_model.passage_embedding_model = st.text_input(
+            if self.passage_search_request.dense_retriever == 'multihop':
+                self.passage_search_request.embedding_model.query_model = self.passage_search_request.embedding_model.passage_model = st.text_input(
                     label="Enter an embedding model.",
                     value="sentence-transformers/all-mpnet-base-v2"
                 )
@@ -58,12 +58,12 @@ class LongFormQAGUI:
                     value=2
                 )
 
-            elif self.passage_search_request.retriever == 'dense_passage':
-                self.passage_search_request.embedding_model.query_embedding_model = st.text_input(
+            elif self.passage_search_request.dense_retriever == 'dense_passage':
+                self.passage_search_request.embedding_model.query_model = st.text_input(
                     label="Enter a query embedding model.",
                     value="vblagoje/dpr-question_encoder-single-lfqa-wiki"
                 )
-                self.passage_search_request.embedding_model.passage_embedding_model = st.text_input(
+                self.passage_search_request.embedding_model.passage_model = st.text_input(
                     label="Enter a passage embedding model.",
                     value="vblagoje/dpr-ctx_encoder-single-lfqa-wiki"
                 )
@@ -72,24 +72,24 @@ class LongFormQAGUI:
                     value=128
                 )
             else:
-                st.error("Please select a right retriever.")
+                st.error("Please select a right dense retriever.")
             self.passage_search_request.api_key = None
 
         elif self.passage_search_request.retriever_source_type == 'openai':
-            self.passage_search_request.retriever = "basic"
+            self.passage_search_request.dense_retriever = "basic"
             open_ai_model = {
                 "ada": 1024,
                 "babbage": 2048,
                 "curie": 4096,
                 "davinci": 12288
             }
-            self.passage_search_request.embedding_model.query_embedding_model = self.passage_search_request.embedding_model.passage_embedding_model = st.radio(
+            self.passage_search_request.embedding_model.query_model = self.passage_search_request.embedding_model.passage_model = st.radio(
                 label="Enter an embedding model.",
                 options=open_ai_model.keys(),
                 index=3
             )
             self.passage_search_request.embedding_dimension = open_ai_model[
-                self.passage_search_request.embedding_model.query_embedding_model]
+                self.passage_search_request.embedding_model.query_model]
             self.passage_search_request.api_key = st.text_input(
                 label="Enter an OpenAI API key.",
                 value=""
@@ -102,6 +102,19 @@ class LongFormQAGUI:
             options=['cosine', 'dot_product'],
             index=1
         )
+
+        self.passage_search_request.sparse_retriever = st.radio(
+            label="Pick a sparse retriever.",
+            options=['bm25', 'tfidf'],
+            index=0
+        )
+
+        if self.passage_search_request.sparse_retriever == 'bm25':
+            pass
+        elif self.passage_search_request.sparse_retriever == 'tfidf':
+            pass
+        else:
+            st.error("Please select a right sparse retriever.")
 
         self.lfqa_request.generator_model_format = st.radio(
             label="Pick a generator model format.",
@@ -117,11 +130,11 @@ class LongFormQAGUI:
             self.lfqa_request.prompt = None
             self.lfqa_request.answer_min_length = st.number_input(
                 label="Enter a minimum length of the answer.",
-                value=500
+                value=300
             )
             self.lfqa_request.answer_max_length = st.number_input(
                 label="Enter a maximum length of the answer.",
-                value=800
+                value=500
             )
             self.lfqa_request.answer_max_tokens = None
             self.lfqa_request.api_key = None
@@ -157,7 +170,7 @@ class LongFormQAGUI:
             self.lfqa_request.answer_min_length = None
             self.lfqa_request.answer_max_length = st.number_input(
                 label="Enter a maximum length of the answer.",
-                value=800
+                value=500
             )
             self.lfqa_request.answer_max_tokens = None
         else:
@@ -233,14 +246,10 @@ class LongFormQAGUI:
             value='1 3 5'
         )
 
-        self.passage_search_request.percentage = st.slider(
-            label='Pick a retriever percentage.',
-            min_value=0.0,
-            max_value=100.0,
-            step=0.01,
-            value=10.0
+        self.passage_search_request.retriever_top_k = st.number_input(
+            label="Enter a retriever top-k of granule.",
+            value=0
         )
-        self.passage_search_request.percentage /= 100
 
         passage_search_request_dict: dict = self.passage_search_request.dict(
             exclude={"api_key", "num_iterations"}
@@ -259,39 +268,22 @@ class LongFormQAGUI:
                 lfqa_request=self.lfqa_request
             )
 
-            metadata_response: dict = lfqa_search_response.generative_qa_result["_debug"]["Retriever"]["output"][
+            metadata_response: dict = lfqa_search_response.generative_qa_result["_debug"]["DocumentJoiner"]["output"][
                 "documents"]
             answers_response: list = lfqa_search_response.generative_qa_result["answers"]
 
-            if self.lfqa_request.generator_model_format == "llm_prompt":
-                st.subheader("Output Process Duration")
-                st.write(f"{lfqa_search_response.process_duration} seconds")
+            st.subheader("Output Process Duration")
+            st.write(f"{lfqa_search_response.process_duration} seconds")
 
-                st.subheader("Output Content")
-                st.write(f"Answer:")
-                st.write(f"{answers_response[0].answer}")
-                st.write(f"Retrieved documents:")
-                retrieved_documents_df: DataFrame = pd.DataFrame(
-                    columns=["Content", "Score"],
-                    data=[(doc.content, doc.score) for doc in metadata_response]
-                )
-                st.table(retrieved_documents_df)
-
-            elif self.lfqa_request.generator_model_format == "seq2seq":
-                st.subheader("Output Process Duration")
-                st.write(f"{lfqa_search_response.process_duration} seconds")
-
-                st.subheader("Output Content")
-                st.write(f"Answer:")
-                st.write(f"{answers_response[0].answer}")
-                st.write(f"Retrieved documents:")
-                retrieved_documents_df: DataFrame = pd.DataFrame(
-                    columns=["Content", "Score"],
-                    data=[(doc.content, doc.score) for doc in metadata_response]
-                )
-                st.table(retrieved_documents_df)
-            else:
-                st.error("Please select a right model format.")
+            st.subheader("Output Content")
+            st.write(f"Answer:")
+            st.write(f"{answers_response[0].answer}")
+            st.write(f"Retrieved documents:")
+            retrieved_documents_df: DataFrame = pd.DataFrame(
+                columns=["Content", "Score"],
+                data=[(doc.content, doc.score) for doc in metadata_response]
+            )
+            st.table(retrieved_documents_df)
 
 
 long_form_qa_gui = LongFormQAGUI()

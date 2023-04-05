@@ -40,14 +40,14 @@ class PassageSearchGUI:
         )
 
         if self.passage_search_request.retriever_source_type == 'local':
-            self.passage_search_request.retriever = st.radio(
+            self.passage_search_request.dense_retriever = st.radio(
                 label="Pick a retriever.",
                 options=['multihop', 'dense_passage'],
                 index=1
             )
 
-            if self.passage_search_request.retriever == 'multihop':
-                self.passage_search_request.embedding_model.query_embedding_model = self.passage_search_request.embedding_model.passage_embedding_model = st.text_input(
+            if self.passage_search_request.dense_retriever == 'multihop':
+                self.passage_search_request.embedding_model.query_model = self.passage_search_request.embedding_model.passage_model = st.text_input(
                     label="Enter an embedding model.",
                     value="sentence-transformers/all-mpnet-base-v2"
                 )
@@ -55,12 +55,12 @@ class PassageSearchGUI:
                     label="Enter an embedding dimension.",
                     value=768
                 )
-            elif self.passage_search_request.retriever == 'dense_passage':
-                self.passage_search_request.embedding_model.query_embedding_model = st.text_input(
+            elif self.passage_search_request.dense_retriever == 'dense_passage':
+                self.passage_search_request.embedding_model.query_model = st.text_input(
                     label="Enter a query embedding model.",
                     value="vblagoje/dpr-question_encoder-single-lfqa-wiki"
                 )
-                self.passage_search_request.embedding_model.passage_embedding_model = st.text_input(
+                self.passage_search_request.embedding_model.passage_model = st.text_input(
                     label="Enter a passage embedding model.",
                     value="vblagoje/dpr-ctx_encoder-single-lfqa-wiki"
                 )
@@ -69,7 +69,7 @@ class PassageSearchGUI:
                     value=128
                 )
             else:
-                st.error("Please select a right retriever.")
+                st.error("Please select a right dense retriever.")
 
             self.passage_search_request.num_iterations = st.number_input(
                 label="Enter a number of iterations/hops.",
@@ -85,13 +85,13 @@ class PassageSearchGUI:
                 "curie": 4096,
                 "davinci": 12288
             }
-            self.passage_search_request.embedding_model.query_embedding_model = self.passage_search_request.embedding_model.passage_embedding_model = st.radio(
+            self.passage_search_request.embedding_model.query_model = self.passage_search_request.embedding_model.passage_model = st.radio(
                 label="Enter an embedding model.",
                 options=open_ai_model.keys(),
                 index=3
             )
             self.passage_search_request.embedding_dimension = open_ai_model[
-                self.passage_search_request.embedding_model.query_embedding_model]
+                self.passage_search_request.embedding_model.query_model]
             self.passage_search_request.api_key = st.text_input(
                 label="Enter an OpenAI API key.",
                 value=""
@@ -104,6 +104,19 @@ class PassageSearchGUI:
             options=['cosine', 'dot_product'],
             index=1
         )
+
+        self.passage_search_request.sparse_retriever = st.radio(
+            label="Pick a sparse retriever.",
+            options=['bm25', 'tfidf'],
+            index=0
+        )
+
+        if self.passage_search_request.sparse_retriever == 'bm25':
+            pass
+        elif self.passage_search_request.sparse_retriever == 'tfidf':
+            pass
+        else:
+            st.error("Please select a right sparse retriever.")
 
         self.passage_search_request.corpus_source_type = st.radio(
             label="Pick a corpus source type.",
@@ -175,14 +188,10 @@ class PassageSearchGUI:
             value='1 3 5'
         )
 
-        self.passage_search_request.percentage = st.slider(
-            label='Pick a percentage.',
-            min_value=0.0,
-            max_value=100.0,
-            step=0.01,
-            value=10.0
+        self.passage_search_request.retriever_top_k = st.number_input(
+            label="Enter a retriever top-k of granule.",
+            value=0
         )
-        self.passage_search_request.percentage /= 100
 
         passage_search_request_dict: dict = self.passage_search_request.dict(
             exclude={"api_key"}
@@ -192,6 +201,7 @@ class PassageSearchGUI:
                 passage_search_request=self.passage_search_request
             )
 
+            print(passage_search_response.retrieval_result)
             result_windowed_documents: list = passage_search_response.retrieval_result["documents"]
             result_documents = pre_processor.granularize(
                 corpus=self.passage_search_request.corpus,
@@ -204,11 +214,11 @@ class PassageSearchGUI:
 
             selected_result_labels: list = search_statistics.get_selected_labels(
                 document_indexes_with_overlapped_scores=result_document_indexes_with_overlapped_scores,
-                percentage=self.passage_search_request.percentage
+                top_k=self.passage_search_request.retriever_top_k
             )
             selected_result_documents: list[str] = search_statistics.get_selected_documents(
                 document_indexes_with_overlapped_scores=result_document_indexes_with_overlapped_scores,
-                percentage=self.passage_search_request.percentage,
+                top_k=self.passage_search_request.retriever_top_k,
                 source_documents=result_documents
             )
 

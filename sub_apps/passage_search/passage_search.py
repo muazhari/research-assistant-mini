@@ -3,9 +3,9 @@ import os
 from datetime import datetime, timedelta
 from typing import List
 
-from haystack.document_stores import FAISSDocumentStore
-from haystack.nodes import BaseRetriever
-from haystack.pipelines import DocumentSearchPipeline
+from haystack import Pipeline
+from haystack.document_stores import FAISSDocumentStore, InMemoryDocumentStore
+from haystack.nodes import BaseRetriever, JoinDocuments
 from haystack.schema import Document
 
 from models.passage_search_request import PassageSearchRequest
@@ -50,7 +50,8 @@ class PassageSearch:
 
         return document_store_index_hash
 
-    def get_retriever(self, passage_search_request: PassageSearchRequest, documents: List[Document]) -> BaseRetriever:
+    def get_dense_retriever(self, passage_search_request: PassageSearchRequest,
+                            documents: List[Document]) -> BaseRetriever:
         document_store_index_hash: str = self.get_document_store_index_hash(
             passage_search_request=passage_search_request
         )
@@ -62,7 +63,7 @@ class PassageSearch:
                 index_path=faiss_index_path,
                 config_path=faiss_config_path,
             )
-            retriever = retriever_model.get_retriever(
+            retriever: BaseRetriever = retriever_model.get_dense_retriever(
                 document_store=document_store,
                 passage_search_request=passage_search_request,
             )
@@ -75,7 +76,7 @@ class PassageSearch:
                 similarity=passage_search_request.similarity_function,
                 duplicate_documents="skip",
             )
-            retriever = retriever_model.get_retriever(
+            retriever: BaseRetriever = retriever_model.get_dense_retriever(
                 document_store=document_store,
                 passage_search_request=passage_search_request,
             )
@@ -85,6 +86,57 @@ class PassageSearch:
 
         return retriever
 
+    def get_sparse_retriever(self, passage_search_request: PassageSearchRequest,
+                             documents: List[Document]) -> BaseRetriever:
+        document_store: InMemoryDocumentStore = InMemoryDocumentStore(
+            embedding_dim=passage_search_request.embedding_dimension,
+            return_embedding=True,
+            similarity=passage_search_request.similarity_function,
+            duplicate_documents="skip",
+            use_bm25=True
+        )
+        retriever: BaseRetriever = retriever_model.get_sparse_retriever(
+            document_store=document_store,
+            passage_search_request=passage_search_request,
+        )
+        document_store.write_documents(documents)
+
+        return retriever
+
+    def get_pipeline(self, passage_search_request: PassageSearchRequest, documents: List[Document]) -> Pipeline:
+        dense_retriever: BaseRetriever = self.get_dense_retriever(
+            passage_search_request=passage_search_request,
+            documents=documents
+        )
+
+        sparse_retriever: BaseRetriever = self.get_sparse_retriever(
+            passage_search_request=passage_search_request,
+            documents=documents
+        )
+
+        document_joiner: JoinDocuments = JoinDocuments(
+            join_mode="reciprocal_rank_fusion"
+        )
+
+        pipeline = Pipeline()
+        pipeline.add_node(
+            component=dense_retriever,
+            name="DenseRetriever",
+            inputs=["Query"]
+        )
+        pipeline.add_node(
+            component=sparse_retriever,
+            name="SparseRetriever",
+            inputs=["Query"]
+        )
+        pipeline.add_node(
+            component=document_joiner,
+            name="DocumentJoiner",
+            inputs=["DenseRetriever", "SparseRetriever"]
+        )
+
+        return pipeline
+
     def search(self, passage_search_request: PassageSearchRequest) -> PassageSearchResponse:
         time_start: datetime = datetime.now()
 
@@ -92,16 +144,17 @@ class PassageSearch:
             passage_search_request=passage_search_request
         )
 
-        retriever: BaseRetriever = self.get_retriever(
+        pipeline: Pipeline = self.get_pipeline(
             passage_search_request=passage_search_request,
             documents=window_sized_documents
         )
 
-        retrieval_pipeline: DocumentSearchPipeline = DocumentSearchPipeline(
-            retriever)
-        retrieval_result: dict = retrieval_pipeline.run(
+        retrieval_result: dict = pipeline.run(
             query=passage_search_request.query,
-            params={"Retriever": {"top_k": len(window_sized_documents)}},
+            params={
+                "DenseRetriever": {"top_k": passage_search_request.retriever_top_k},
+                "SparseRetriever": {"top_k": passage_search_request.retriever_top_k},
+            },
             debug=True
         )
 
