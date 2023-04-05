@@ -190,7 +190,7 @@ class PassageSearchGUI:
 
         self.passage_search_request.retriever_top_k = st.number_input(
             label="Enter a retriever top-k from documents.",
-            value=0
+            value=10
         )
 
         passage_search_request_dict: dict = self.passage_search_request.dict(
