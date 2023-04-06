@@ -285,7 +285,7 @@ class LongFormQAGUI:
 
             st.subheader("Output Score Overview")
             st.caption(
-                "Metric to determine how sure the meaning of the query is in the corpus (score to document in descending order).")
+                "Metric to determine how sure the meaning of the query is in the retrieved documents (score to document in descending order).")
 
             chart_df: DataFrame = pd.DataFrame(
                 data=[(doc.score) for doc in documents_response],
