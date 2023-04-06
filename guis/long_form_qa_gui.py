@@ -109,12 +109,19 @@ class LongFormQAGUI:
             index=1
         )
 
-        if self.passage_search_request.sparse_retriever == 'bm25':
-            pass
-        elif self.passage_search_request.sparse_retriever == 'tfidf':
-            pass
+        self.passage_search_request.ranker = st.radio(
+            label="Pick a ranker.",
+            options=['sentence_transformers'],
+            index=0
+        )
+
+        if self.passage_search_request.ranker == 'sentence_transformers':
+            self.passage_search_request.embedding_model.ranker_model = st.text_input(
+                label="Enter a ranker model.",
+                value="naver/trecdl22-crossencoder-debertav3"
+            )
         else:
-            st.error("Please select a right sparse retriever.")
+            st.error("Please select a right ranker.")
 
         self.lfqa_request.generator_model_format = st.radio(
             label="Pick a generator model format.",
@@ -209,8 +216,7 @@ class LongFormQAGUI:
         if self.passage_search_request.corpus not in ["", None] and self.passage_search_request.corpus_source_type in [
             'file']:
             uploaded_file_name = os.path.splitext(os.path.basename(self.passage_search_request.corpus))[0]
-            uploaded_file_page_length = document_conversion.get_pdf_page_length(
-                self.passage_search_request.corpus)
+            uploaded_file_page_length = document_conversion.get_pdf_page_length(self.passage_search_request.corpus)
 
             start_page = st.number_input(
                 label=f"Enter the start page of the pdf you want to be retrieved (1-{uploaded_file_page_length}).",
@@ -247,8 +253,13 @@ class LongFormQAGUI:
         )
 
         self.passage_search_request.retriever_top_k = st.number_input(
-            label="Enter a retriever top-k from documents.",
-            value=10
+            label="Enter a top-k for each retriever.",
+            value=100
+        )
+
+        self.passage_search_request.ranker_top_k = st.number_input(
+            label="Enter a top-k for each rerank.",
+            value=15
         )
 
         passage_search_request_dict: dict = self.passage_search_request.dict(
@@ -268,9 +279,19 @@ class LongFormQAGUI:
                 lfqa_request=self.lfqa_request
             )
 
-            metadata_response: dict = lfqa_search_response.generative_qa_result["_debug"]["DocumentJoiner"]["output"][
+            metadata_response: list = lfqa_search_response.generative_qa_result["_debug"]["Ranker"]["output"][
                 "documents"]
             answers_response: list = lfqa_search_response.generative_qa_result["answers"]
+
+            st.subheader("Output Score Overview")
+            st.caption(
+                "Metric to determine how sure the meaning of the query is in the corpus (score_mean to document in descending order).")
+
+            chart_df: DataFrame = pd.DataFrame(
+                data=[(doc.score) for doc in metadata_response],
+                columns=['score']
+            )
+            st.line_chart(chart_df)
 
             st.subheader("Output Process Duration")
             st.write(f"{lfqa_search_response.process_duration} seconds")

@@ -111,12 +111,19 @@ class PassageSearchGUI:
             index=1
         )
 
-        if self.passage_search_request.sparse_retriever == 'bm25':
-            pass
-        elif self.passage_search_request.sparse_retriever == 'tfidf':
-            pass
+        self.passage_search_request.ranker = st.radio(
+            label="Pick a ranker.",
+            options=['sentence_transformers'],
+            index=0
+        )
+
+        if self.passage_search_request.ranker == 'sentence_transformers':
+            self.passage_search_request.embedding_model.ranker_model = st.text_input(
+                label="Enter a ranker model.",
+                value="naver/trecdl22-crossencoder-debertav3"
+            )
         else:
-            st.error("Please select a right sparse retriever.")
+            st.error("Please select a right ranker.")
 
         self.passage_search_request.corpus_source_type = st.radio(
             label="Pick a corpus source type.",
@@ -151,8 +158,7 @@ class PassageSearchGUI:
         if self.passage_search_request.corpus not in ["", None] and self.passage_search_request.corpus_source_type in [
             'file']:
             uploaded_file_name = os.path.splitext(os.path.basename(self.passage_search_request.corpus))[0]
-            uploaded_file_page_length = document_conversion.get_pdf_page_length(
-                self.passage_search_request.corpus)
+            uploaded_file_page_length = document_conversion.get_pdf_page_length(self.passage_search_request.corpus)
 
             start_page: int = st.number_input(
                 label=f"Enter the start page of the pdf you want to be retrieved (1-{uploaded_file_page_length}).",
@@ -189,8 +195,13 @@ class PassageSearchGUI:
         )
 
         self.passage_search_request.retriever_top_k = st.number_input(
-            label="Enter a retriever top-k from documents.",
-            value=10
+            label="Enter a top-k for each retriever.",
+            value=100
+        )
+
+        self.passage_search_request.ranker_top_k = st.number_input(
+            label="Enter a top-k for each rerank.",
+            value=15
         )
 
         passage_search_request_dict: dict = self.passage_search_request.dict(
@@ -201,7 +212,6 @@ class PassageSearchGUI:
                 passage_search_request=self.passage_search_request
             )
 
-            print(passage_search_response.retrieval_result)
             result_windowed_documents: list = passage_search_response.retrieval_result["documents"]
             result_documents = pre_processor.granularize(
                 corpus=self.passage_search_request.corpus,

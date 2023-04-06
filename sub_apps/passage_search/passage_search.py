@@ -5,11 +5,12 @@ from typing import List
 
 from haystack import Pipeline
 from haystack.document_stores import FAISSDocumentStore, InMemoryDocumentStore
-from haystack.nodes import BaseRetriever, JoinDocuments
+from haystack.nodes import BaseRetriever, JoinDocuments, BaseRanker
 from haystack.schema import Document
 
 from models.passage_search_request import PassageSearchRequest
 from models.passage_search_response import PassageSearchResponse
+from sub_apps.passage_search.ranker_model import ranker_model
 from sub_apps.passage_search.retriever_model import retriever_model
 from utilities.pre_processor import pre_processor
 
@@ -88,7 +89,12 @@ class PassageSearch:
 
     def get_sparse_retriever(self, passage_search_request: PassageSearchRequest,
                              documents: List[Document]) -> BaseRetriever:
+        document_store_index_hash: str = self.get_document_store_index_hash(
+            passage_search_request=passage_search_request
+        )
+
         document_store: InMemoryDocumentStore = InMemoryDocumentStore(
+            index=document_store_index_hash,
             embedding_dim=passage_search_request.embedding_dimension,
             return_embedding=True,
             similarity=passage_search_request.similarity_function,
@@ -103,19 +109,25 @@ class PassageSearch:
 
         return retriever
 
+    def get_ranker(self, passage_search_request: PassageSearchRequest) -> BaseRanker:
+        return ranker_model.get_ranker(
+            passage_search_request=passage_search_request
+        )
+
     def get_pipeline(self, passage_search_request: PassageSearchRequest, documents: List[Document]) -> Pipeline:
         dense_retriever: BaseRetriever = self.get_dense_retriever(
             passage_search_request=passage_search_request,
             documents=documents
         )
-
         sparse_retriever: BaseRetriever = self.get_sparse_retriever(
             passage_search_request=passage_search_request,
             documents=documents
         )
-
         document_joiner: JoinDocuments = JoinDocuments(
             join_mode="reciprocal_rank_fusion"
+        )
+        ranker: BaseRanker = self.get_ranker(
+            passage_search_request=passage_search_request
         )
 
         pipeline = Pipeline()
@@ -133,6 +145,11 @@ class PassageSearch:
             component=document_joiner,
             name="DocumentJoiner",
             inputs=["DenseRetriever", "SparseRetriever"]
+        )
+        pipeline.add_node(
+            component=ranker,
+            name="Ranker",
+            inputs=["DocumentJoiner"]
         )
 
         return pipeline
@@ -154,6 +171,7 @@ class PassageSearch:
             params={
                 "DenseRetriever": {"top_k": passage_search_request.retriever_top_k},
                 "SparseRetriever": {"top_k": passage_search_request.retriever_top_k},
+                "Ranker": {"top_k": passage_search_request.ranker_top_k}
             },
             debug=True
         )

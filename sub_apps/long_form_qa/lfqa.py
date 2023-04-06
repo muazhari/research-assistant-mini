@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from typing import List
 
 from haystack import Pipeline
-from haystack.nodes import BaseGenerator, JoinDocuments, BaseRetriever
+from haystack.nodes import BaseGenerator
 from haystack.schema import Document
 
 from models.lfqa_response import LFQAResponse
@@ -16,44 +16,19 @@ class LFQA:
 
     def get_pipeline(self, passage_search_request: PassageSearchRequest, lfqa_request: LFQARequest,
                      documents: List[Document]) -> Pipeline:
-        dense_retriever: BaseRetriever = passage_search.get_dense_retriever(
-            passage_search_request=passage_search_request,
-            documents=documents
-        )
-
-        sparse_retriever: BaseRetriever = passage_search.get_sparse_retriever(
-            passage_search_request=passage_search_request,
-            documents=documents
-        )
-
-        document_joiner: JoinDocuments = JoinDocuments(
-            join_mode="reciprocal_rank_fusion"
-        )
-
         generator: BaseGenerator = generator_model.get_generator(
             lfqa_request=lfqa_request
         )
 
-        pipeline = Pipeline()
-        pipeline.add_node(
-            component=dense_retriever,
-            name="DenseRetriever",
-            inputs=["Query"]
+        pipeline: Pipeline = passage_search.get_pipeline(
+            passage_search_request=passage_search_request,
+            documents=documents
         )
-        pipeline.add_node(
-            component=sparse_retriever,
-            name="SparseRetriever",
-            inputs=["Query"]
-        )
-        pipeline.add_node(
-            component=document_joiner,
-            name="DocumentJoiner",
-            inputs=["DenseRetriever", "SparseRetriever"]
-        )
+
         pipeline.add_node(
             component=generator,
             name="Generator",
-            inputs=["DocumentJoiner"]
+            inputs=["Ranker"]
         )
 
         return pipeline
@@ -76,6 +51,7 @@ class LFQA:
             params={
                 "DenseRetriever": {"top_k": passage_search_request.retriever_top_k},
                 "SparseRetriever": {"top_k": passage_search_request.retriever_top_k},
+                "Ranker": {"top_k": passage_search_request.ranker_top_k},
             },
             debug=True
         )

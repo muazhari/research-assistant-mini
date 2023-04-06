@@ -8,11 +8,10 @@ from models.passage_search_request import PassageSearchRequest
 class RetrieverModel:
     def get_multihop_retriever(self, document_store: BaseDocumentStore,
                                passage_search_request: PassageSearchRequest) -> BaseRetriever:
-        retriever: EmbeddingRetriever = MultihopEmbeddingRetriever(
+        retriever: MultihopEmbeddingRetriever = MultihopEmbeddingRetriever(
             document_store=document_store,
             embedding_model=passage_search_request.embedding_model.query_model,
             num_iterations=passage_search_request.num_iterations,
-            use_gpu=True
         )
         return retriever
 
@@ -22,7 +21,6 @@ class RetrieverModel:
             document_store=document_store,
             embedding_model=passage_search_request.embedding_model.query_model,
             api_key=passage_search_request.api_key,
-            use_gpu=True
         )
         return retriever
 
@@ -32,7 +30,6 @@ class RetrieverModel:
             document_store=document_store,
             query_embedding_model=passage_search_request.embedding_model.query_model,
             passage_embedding_model=passage_search_request.embedding_model.passage_model,
-            use_gpu=True
         )
         return retriever
 
