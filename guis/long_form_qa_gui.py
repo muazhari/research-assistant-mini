@@ -279,16 +279,16 @@ class LongFormQAGUI:
                 lfqa_request=self.lfqa_request
             )
 
-            metadata_response: list = lfqa_search_response.generative_qa_result["_debug"]["Ranker"]["output"][
+            documents_response: list = lfqa_search_response.generative_qa_result["_debug"]["Ranker"]["output"][
                 "documents"]
             answers_response: list = lfqa_search_response.generative_qa_result["answers"]
 
             st.subheader("Output Score Overview")
             st.caption(
-                "Metric to determine how sure the meaning of the query is in the corpus (score_mean to document in descending order).")
+                "Metric to determine how sure the meaning of the query is in the corpus (score to document in descending order).")
 
             chart_df: DataFrame = pd.DataFrame(
-                data=[(doc.score) for doc in metadata_response],
+                data=[(doc.score) for doc in documents_response],
                 columns=['score']
             )
             st.line_chart(chart_df)
@@ -302,7 +302,7 @@ class LongFormQAGUI:
             st.write(f"Retrieved documents:")
             retrieved_documents_df: DataFrame = pd.DataFrame(
                 columns=["Content", "Score"],
-                data=[(doc.content, doc.score) for doc in metadata_response]
+                data=[(doc.content, doc.score) for doc in documents_response]
             )
             st.table(retrieved_documents_df)
 
