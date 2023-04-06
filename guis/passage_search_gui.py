@@ -120,7 +120,7 @@ class PassageSearchGUI:
         if self.passage_search_request.ranker == 'sentence_transformers':
             self.passage_search_request.embedding_model.ranker_model = st.text_input(
                 label="Enter a ranker model.",
-                value="naver/trecdl22-crossencoder-debertav3"
+                value="cross-encoder/ms-marco-MiniLM-L-12-v2"
             )
         else:
             st.error("Please select a right ranker.")
