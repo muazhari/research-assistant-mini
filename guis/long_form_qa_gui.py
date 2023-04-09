@@ -118,7 +118,7 @@ class LongFormQAGUI:
         if self.passage_search_request.ranker == 'sentence_transformers':
             self.passage_search_request.embedding_model.ranker_model = st.text_input(
                 label="Enter a ranker model.",
-                value="caskcsg/cotmae_base_msmarco_reranker"
+                value="Luyu/co-condenser-marco"
             )
         else:
             st.error("Please select a right ranker.")
