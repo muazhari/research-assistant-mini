@@ -55,6 +55,10 @@ class PassageSearchGUI:
                     label="Enter an embedding dimension.",
                     value=768
                 )
+                self.passage_search_request.num_iterations = st.number_input(
+                    label="Enter a number of iterations/hops.",
+                    value=2
+                )
             elif self.passage_search_request.dense_retriever == 'dense_passage':
                 self.passage_search_request.embedding_model.query_model = st.text_input(
                     label="Enter a query embedding model.",
@@ -68,14 +72,9 @@ class PassageSearchGUI:
                     label="Enter an embedding dimension.",
                     value=128
                 )
+                self.passage_search_request.num_iterations = None
             else:
                 st.error("Please select a right dense retriever.")
-
-            self.passage_search_request.num_iterations = st.number_input(
-                label="Enter a number of iterations/hops.",
-                value=2
-            )
-
             api_key = None
         elif self.passage_search_request.retriever_source_type == 'openai':
             retriever = "basic"
@@ -205,7 +204,7 @@ class PassageSearchGUI:
         )
 
         passage_search_request_dict: dict = self.passage_search_request.dict(
-            exclude={"api_key"}
+            exclude={"api_key", "num_iterations"}
         )
         if all(value not in [None, ""] for value in passage_search_request_dict.values()):
             passage_search_response: PassageSearchResponse = passage_search.search(
