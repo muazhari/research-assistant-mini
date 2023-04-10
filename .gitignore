@@ -1,1 +1,2 @@
 /document_store/*
+!/document_store/__init__.py
