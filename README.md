@@ -77,11 +77,11 @@ print("Open public URL:")
 
 ## Notes
 
-1. If you want to process text in another language, you can use the other language model or the *multilingual model.* For example, use the settings below if you want to process Indonesian text:
-   - Retriever DPR Query: voidful/dpr-question_encoder-bert-base-multilingual
-    - Retriever DPR Passage:  voidful/dpr-ctx_encoder-bert-base-multilingual
-    - Retriever Embedding Dimension: 768
-    - Reranker: cross-encoder/mmarco-mMiniLMv2-L12-H384-v1
+1. If you want to process text in another language, you can use the other language model or the multilingual model. For example, use the settings below if you want to process Indonesian text:
+   - Retriever DPR Query: `voidful/dpr-question_encoder-bert-base-multilingual`
+    - Retriever DPR Passage:  `voidful/dpr-ctx_encoder-bert-base-multilingual`
+    - Retriever Embedding Dimension: `768`
+    - Reranker: `cross-encoder/mmarco-mMiniLMv2-L12-H384-v1`
     - Prompt: 
 ```
 Sintesiskan jawaban komprehensif dari paragraf-paragraf berikut yang paling relevan dan pertanyaan yang diberikan. Berikan jawaban panjang yang diuraikan dari poin-poin utama dan informasi dalam paragraf-paragraf. Katakan tidak relevan jika paragraf-paragraf tidak relevan dengan pertanyaan, lalu jelaskan mengapa itu tidak relevan.
