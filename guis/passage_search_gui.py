@@ -93,7 +93,8 @@ class PassageSearchGUI:
                 self.passage_search_request.embedding_model.query_model]
             self.passage_search_request.api_key = st.text_input(
                 label="Enter an OpenAI API key.",
-                value=""
+                value="",
+                type="password"
             )
         else:
             st.error("Please select a right retriever source.")
