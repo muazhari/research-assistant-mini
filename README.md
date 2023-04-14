@@ -30,7 +30,7 @@ Research Assistant Mini App using Streamlit user interface.
 
 ### Local
 1. Install the Nvidia GPU driver and CUDA package, then ensure the system can use GPU CUDA cores (via anaconda).
-2. Install [JDK 8](https://www.oracle.com/id/java/technologies/javase/javase8-archive-downloads.html) & Apache Tika (via chocolatey or apt).
+2. Install [JDK 8](https://www.oracle.com/id/java/technologies/javase/javase8-archive-downloads.html), wkhtmltopdf, & Apache Tika (via chocolatey or apt).
 3. Run `git clone https://github.com/muazhari/research-assistant-mini.git`.
 4. Go to `research-assistant-mini` directory.
 5. Run `pip install -r requirements.txt && pip install farm-haystack[all] txtai[all]`. 
