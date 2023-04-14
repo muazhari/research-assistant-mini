@@ -73,7 +73,7 @@ NGROK_TOKEN = "" #@param {type:"string"}
 !yes | DEBIAN_FRONTEND=noninteractive apt-get install -yqq wkhtmltopdf xvfb libopenblas-dev libomp-dev poppler-utils openjdk-8-jdk jq
 
 !pip install -r requirements.txt
-!pip install pyngrok pip install farm-haystack[only-faiss,only-faiss-gpu,crawler,preprocessing,ocr] txtai[pipeline]
+!pip install pyngrok farm-haystack[only-faiss,only-faiss-gpu,crawler,preprocessing,ocr] txtai[pipeline]
 
 !nvidia-smi
 
