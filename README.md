@@ -39,7 +39,7 @@ Research Assistant Mini App using Streamlit user interface.
 8. Open URL `http://localhost:8501` in a browser.
 9. Use the app.
 
-### Jupyter Notebook
+### Jupyter Notebook (Recommended)
 1. Get your Open AI API key.
 2. Get your Ngrok Authentication Token.
 3. Create cell based on below Jupyter Notebook script in Kaggle, or other alternatives.
