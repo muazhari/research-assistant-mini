@@ -33,7 +33,7 @@ Research Assistant Mini App using Streamlit user interface.
 2. Install [JDK 8](https://www.oracle.com/id/java/technologies/javase/javase8-archive-downloads.html), wkhtmltopdf, & Apache Tika (via chocolatey or apt).
 3. Run `git clone https://github.com/muazhari/research-assistant-mini.git`.
 4. Go to `research-assistant-mini` directory.
-5. Run `pip install -r requirements.txt && pip install farm-haystack[all] txtai[all]`. 
+5. Run `pip install -r requirements.txt && pip install farm-haystack[only-faiss,only-faiss-gpu,crawler,preprocessing,ocr] txtai[pipeline]`. 
 6. Get your Open AI API key.
 7. Run `python run.py --server.address 0.0.0.0 --server.port 8501` (Run as Administrator if in Windows).
 8. Open URL `http://localhost:8501` in a browser.
@@ -58,7 +58,7 @@ NGROK_TOKEN = "" #@param {type:"string"}
 !yes | DEBIAN_FRONTEND=noninteractive apt-get install -yqq wkhtmltopdf xvfb libopenblas-dev libomp-dev poppler-utils openjdk-8-jdk jq
 
 !pip install -r requirements.txt
-!pip install pyngrok pip install farm-haystack[only-faiss,only-faiss-gpu,inmemorygraph,crawler,preprocessing,ocr] txtai[all]
+!pip install pyngrok pip install farm-haystack[only-faiss,only-faiss-gpu,crawler,preprocessing,ocr] txtai[pipeline]
 
 !nvidia-smi
 
