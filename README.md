@@ -17,10 +17,12 @@ Research Assistant Mini App using Streamlit user interface.
 ## Demo
 
 - Passage Search
+
 [![passage_search_demo](https://img.youtube.com/vi/3CR1Vnyx8ik/0.jpg)](https://youtu.be/3CR1Vnyx8ik)
 
 - Long Form QA
-![long-form_qa_demo](https://img.youtube.com/vi/Ih-qgRqUpzc/0.jpg)](https://youtu.be/Ih-qgRqUpzc)
+
+[![long-form_qa_demo](https://img.youtube.com/vi/Ih-qgRqUpzc/0.jpg)](https://youtu.be/Ih-qgRqUpzc)
 
 
 
