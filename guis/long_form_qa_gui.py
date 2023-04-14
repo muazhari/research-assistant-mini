@@ -32,7 +32,7 @@ class LongFormQAGUI:
         st.subheader("Configurations")
 
         self.passage_search_request.retriever_source_type = st.radio(
-            label="Pick a retriever model format.",
+            label="Pick a retriever source type.",
             options=['local', 'openai'],
             index=0
         )

@@ -34,14 +34,14 @@ class PassageSearchGUI:
         st.subheader("Configurations")
 
         self.passage_search_request.retriever_source_type = st.radio(
-            label="Pick a retriever source.",
+            label="Pick a retriever source type.",
             options=['local', 'openai'],
             index=0
         )
 
         if self.passage_search_request.retriever_source_type == 'local':
             self.passage_search_request.dense_retriever = st.radio(
-                label="Pick a retriever.",
+                label="Pick a dense retriever.",
                 options=['multihop', 'dense_passage'],
                 index=1
             )
