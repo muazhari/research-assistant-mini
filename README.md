@@ -29,14 +29,15 @@ Research Assistant Mini App using Streamlit user interface.
 ## Walkthrough 
 
 ### Local
-1. Install [JDK 8](https://www.oracle.com/id/java/technologies/javase/javase8-archive-downloads.html) & Apache Tika (via chocolatey or apt).
-2. Run `git clone https://github.com/muazhari/research-assistant-mini.git`.
-3. Go to `research-assistant-mini` directory.
-4. Run `pip install -r requirements.txt && pip install farm-haystack[all] txtai[all]`. 
-5. Get your Open AI API key.
-6. Run `python run.py --server.address 0.0.0.0 --server.port 8501` (Run as Administrator if in Windows).
-7. Open URL `http://localhost:8501` in a browser.
-8. Use the app.
+1. Install Nvidia GPU Driver and CUDA package, then ensure the system is able to use GPU CUDA cores.
+2. Install [JDK 8](https://www.oracle.com/id/java/technologies/javase/javase8-archive-downloads.html) & Apache Tika (via chocolatey or apt).
+3. Run `git clone https://github.com/muazhari/research-assistant-mini.git`.
+4. Go to `research-assistant-mini` directory.
+5. Run `pip install -r requirements.txt && pip install farm-haystack[all] txtai[all]`. 
+6. Get your Open AI API key.
+7. Run `python run.py --server.address 0.0.0.0 --server.port 8501` (Run as Administrator if in Windows).
+8. Open URL `http://localhost:8501` in a browser.
+9. Use the app.
 
 ### Jupyter Notebook
 1. Get your Open AI API key.
