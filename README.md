@@ -48,6 +48,21 @@ Research Assistant Mini App using Streamlit user interface.
 #@title Research Assistant Mini App
 NGROK_TOKEN = "" #@param {type:"string"} 
 
+# Python version upgrade script. Use this if the python version not >=3.8.
+!conda create -n newCondaEnvironment -c cctbx202208 -y
+!source /opt/conda/bin/activate newCondaEnvironment && conda install -c cctbx202208 python -y
+!/opt/conda/envs/newCondaEnvironment/bin/python3 --version
+!echo 'print("Hello, World!")' > test.py
+!/opt/conda/envs/newCondaEnvironment/bin/python3 test.py
+!sudo rm /opt/conda/bin/python3
+!sudo ln -sf /opt/conda/envs/newCondaEnvironment/bin/python3 /opt/conda/bin/python3
+!sudo rm /opt/conda/bin/python3.7
+!sudo ln -sf /opt/conda/envs/newCondaEnvironment/bin/python3 /opt/conda/bin/python3.7
+!sudo rm /opt/conda/bin/python
+!sudo ln -s /opt/conda/envs/newCondaEnvironment/bin/python3 /opt/conda/bin/python
+!python --version
+
+# Installation script.
 %cd ~
 !git clone https://github.com/muazhari/research-assistant-mini.git
 %cd ~/research-assistant-mini/
