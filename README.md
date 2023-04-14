@@ -46,10 +46,10 @@ Research Assistant Mini App using Streamlit user interface.
 
 ```python
 #@title Research Assistant Mini App
-NGROK_TOKEN = "1x8fEIsq7CZu9NlrA6VBaoZVceW_5skz5jBVYzJrtutU3UzyV" #@param {type:"string"} 
+NGROK_TOKEN = "" #@param {type:"string"} 
 
-# Python version upgrade script. Use this if the python version is not equal to 3.9.
-!conda create -n newCondaEnvironment python=3.9 -c cctbx202208 -y
+# Python version upgrade script. Use this if the python version not >=3.8.
+!conda create -n newCondaEnvironment -c cctbx202208 -y
 !source /opt/conda/bin/activate newCondaEnvironment && conda install -c cctbx202208 python -y
 !/opt/conda/envs/newCondaEnvironment/bin/python3 --version
 !echo 'print("Hello, World!")' > test.py
