@@ -4,7 +4,6 @@ import pathlib
 from pathlib import Path
 from typing import Optional
 
-import nltk
 import pandas as pd
 import streamlit as st
 from pandas import DataFrame
@@ -19,7 +18,6 @@ from sub_apps.passage_search.document_conversion import document_conversion
 
 class LongFormQAGUI:
     def __init__(self) -> None:
-        nltk.download('punkt')
         self.STREAMLIT_STATIC_PATH: Path = pathlib.Path(st.__path__[0]) / 'static' / 'static'
 
         self.passage_search_request: PassageSearchRequest = PassageSearchRequest()

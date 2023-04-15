@@ -4,7 +4,6 @@ import pathlib
 from pathlib import Path
 from typing import Optional
 
-import nltk
 import pandas as pd
 import streamlit as st
 from pandas import DataFrame
@@ -22,7 +21,6 @@ from utilities.pre_processor import pre_processor
 class PassageSearchGUI:
 
     def __init__(self) -> None:
-        nltk.download('punkt')
         self.STREAMLIT_STATIC_PATH: Path = pathlib.Path(st.__path__[0]) / 'static' / 'static'
 
         self.passage_search_request: PassageSearchRequest = PassageSearchRequest()

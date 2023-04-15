@@ -1,3 +1,4 @@
+import nltk
 import streamlit as st
 
 from guis.long_form_qa_gui import long_form_qa_gui
@@ -6,7 +7,7 @@ from guis.passage_search_gui import passage_search_gui
 
 class App:
     def __init__(self) -> None:
-        pass
+        nltk.download('punkt')
 
     def display(self) -> None:
 
