@@ -62,7 +62,7 @@ NGROK_TOKEN = "" #@param {type:"string"}
 !sudo ln -sf /opt/conda/envs/newCondaEnvironment/bin/python3 /opt/conda/bin/python
 !sudo rm /opt/conda/bin/ngrok
 !sudo ln -sf /opt/conda/envs/newCondaEnvironment/bin/ngrok /opt/conda/bin/ngrok
-!sudo rm  /opt/conda/bin/streamlit
+!sudo rm /opt/conda/bin/streamlit
 !sudo ln -sf /opt/conda/envs/newCondaEnvironment/bin/streamlit /opt/conda/bin/streamlit
 !python --version
 
