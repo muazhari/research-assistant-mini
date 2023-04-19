@@ -258,7 +258,7 @@ class LongFormQAGUI:
         )
 
         self.passage_search_request.ranker_top_k = st.number_input(
-            label="Enter a top-k for each rerank.",
+            label="Enter a top-k for each ranker.",
             value=15
         )
 
