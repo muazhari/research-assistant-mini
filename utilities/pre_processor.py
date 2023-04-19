@@ -54,11 +54,6 @@ class PreProcessor:
             ValueError(f"Granularity {granularity_source} is not supported.")
         return degranularized_corpus
 
-    def deprocess_windowed_corpus(self, windowed_corpus: Tuple[str], granularity_source: str) -> str:
-        degranularized_corpus = self.degranularize(windowed_corpus, granularity_source)
-        deprocessed_corpus = degranularized_corpus
-        return deprocessed_corpus
-
     def windowize(self, corpus: List[str], window_size: int) -> List[Tuple[str, ...]]:
         return list(more_itertools.windowed(corpus, window_size))
 
