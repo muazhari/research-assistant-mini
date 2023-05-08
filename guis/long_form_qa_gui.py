@@ -90,7 +90,7 @@ class LongFormQAGUI:
                 self.passage_search_request.embedding_model.query_model]
             self.passage_search_request.api_key = st.text_input(
                 label="Enter an OpenAI API key.",
-                value="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",
+                value="",
                 type="password"
             )
         else:
@@ -154,7 +154,7 @@ class LongFormQAGUI:
             if self.lfqa_request.generator_model_source_type == 'online':
                 self.lfqa_request.api_key = st.text_input(
                     label="Enter an API key for generator model.",
-                    value="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",
+                    value="",
                     type="password"
                 )
                 self.lfqa_request.generator_model = st.text_input(

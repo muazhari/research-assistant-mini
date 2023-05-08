@@ -37,7 +37,7 @@ class DocumentProcessor:
 
         return granularized_corpus
 
-    def extract_corpus(self, corpus: str, corpus_source_type: str, granularity: str) -> List[str]:
+    def granularize(self, corpus: str, corpus_source_type: str, granularity: str) -> List[str]:
         if corpus_source_type in ["text"]:
             extracted_corpus = self.segment(corpus, granularity)
         elif corpus_source_type in ["file", "web"]:
@@ -61,7 +61,7 @@ class DocumentProcessor:
 
     def process(self, corpus: str, corpus_source_type: str, granularity: str,
                 window_sizes: List[int]) -> List[Document]:
-        extracted_corpus: List[str] = self.extract_corpus(corpus, corpus_source_type, granularity)
+        extracted_corpus: List[str] = self.granularize(corpus, corpus_source_type, granularity)
 
         processed_documents_with_many_window = []
         for window_size in window_sizes:

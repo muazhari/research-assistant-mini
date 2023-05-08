@@ -211,7 +211,7 @@ class PassageSearchGUI:
             )
 
             result_windowed_documents: list = passage_search_response.retrieval_result["documents"]
-            result_documents = document_processor.extract_corpus(
+            result_documents = document_processor.granularize(
                 corpus=self.passage_search_request.corpus,
                 corpus_source_type=self.passage_search_request.corpus_source_type,
                 granularity=self.passage_search_request.granularity
