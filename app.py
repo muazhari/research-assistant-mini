@@ -15,7 +15,7 @@ class App:
             label="Select a sub app.",
             options=["document_network", "document_search",
                      "passage_search", "long_form_qa"],
-            index=2
+            index=3
         )
 
         if sub_app == "document_network":

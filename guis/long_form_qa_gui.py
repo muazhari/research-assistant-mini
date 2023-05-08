@@ -13,7 +13,7 @@ from models.lfqa_response import LFQAResponse
 from models.lfqa_search_request import LFQARequest
 from models.passage_search_request import PassageSearchRequest
 from sub_apps.long_form_qa.lfqa import long_form_qa
-from sub_apps.passage_search.document_conversion import document_conversion
+from utilities.document_conversion import document_conversion
 
 
 class LongFormQAGUI:
@@ -90,7 +90,7 @@ class LongFormQAGUI:
                 self.passage_search_request.embedding_model.query_model]
             self.passage_search_request.api_key = st.text_input(
                 label="Enter an OpenAI API key.",
-                value="",
+                value="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",
                 type="password"
             )
         else:
@@ -154,7 +154,7 @@ class LongFormQAGUI:
             if self.lfqa_request.generator_model_source_type == 'online':
                 self.lfqa_request.api_key = st.text_input(
                     label="Enter an API key for generator model.",
-                    value="",
+                    value="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",
                     type="password"
                 )
                 self.lfqa_request.generator_model = st.text_input(
@@ -249,7 +249,7 @@ class LongFormQAGUI:
 
         self.passage_search_request.window_sizes = st.text_input(
             label='Enter a list of window sizes that seperated by a space.',
-            value='1 3 5'
+            value='1 2 3 4 5'
         )
 
         self.passage_search_request.retriever_top_k = st.number_input(

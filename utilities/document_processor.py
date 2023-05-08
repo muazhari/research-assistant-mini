@@ -1,13 +1,14 @@
 from typing import List, Tuple
 
 import more_itertools
-from txtai.pipeline import Textractor, Segmentation
+from haystack import Document
+from txtai.pipeline import Segmentation, Textractor
 
 
-class PreProcessor:
+class DocumentProcessor:
 
     def segment(self, corpus: str, granularity: str) -> List[str]:
-        granularized_corpus = None
+        granularized_corpus: List[str] = []
         if (granularity == "sentence"):
             segmentator = Segmentation(sentences=True)
             granularized_corpus = segmentator(text=corpus)
@@ -18,10 +19,11 @@ class PreProcessor:
             granularized_corpus = corpus.split(" ")
         else:
             ValueError(f"Granularity {granularity} is not supported.")
+
         return granularized_corpus
 
     def textract(self, corpus: str, granularity: str) -> List[str]:
-        granularized_corpus = None
+        granularized_corpus: List[str] = []
         if granularity == "word":
             granularized_corpus = corpus.split(" ")
         elif granularity == "sentence":
@@ -32,17 +34,20 @@ class PreProcessor:
             granularized_corpus = textractor(text=corpus)
         else:
             ValueError(f"Granularity {granularity} is not supported.")
+
         return granularized_corpus
 
-    def granularize(self, corpus: str, corpus_source_type: str, granularity: str) -> List[str]:
-        granularized_corpus = None
+    def extract_corpus(self, corpus: str, corpus_source_type: str, granularity: str) -> List[str]:
         if corpus_source_type in ["text"]:
-            granularized_corpus = self.segment(corpus, granularity)
+            extracted_corpus = self.segment(corpus, granularity)
         elif corpus_source_type in ["file", "web"]:
-            granularized_corpus = self.textract(corpus, granularity)
+            extracted_corpus = self.textract(corpus, granularity)
         else:
             raise ValueError(f"Source type {corpus_source_type} is not supported.")
-        return granularized_corpus
+        return extracted_corpus
+
+    def windowize(self, corpus: List[str], window_size: int) -> List[Tuple[str, ...]]:
+        return list(more_itertools.windowed(corpus, window_size))
 
     def degranularize(self, windowed_corpus: Tuple[str], granularity_source: str) -> str:
         degranularized_corpus = None
@@ -54,28 +59,21 @@ class PreProcessor:
             ValueError(f"Granularity {granularity_source} is not supported.")
         return degranularized_corpus
 
-    def windowize(self, corpus: List[str], window_size: int) -> List[Tuple[str, ...]]:
-        return list(more_itertools.windowed(corpus, window_size))
+    def process(self, corpus: str, corpus_source_type: str, granularity: str,
+                window_sizes: List[int]) -> List[Document]:
+        extracted_corpus: List[str] = self.extract_corpus(corpus, corpus_source_type, granularity)
 
-    def process(self, corpus: str, corpus_source_type: str, granularity: str, window_size: int):
-        granularized_corpus = self.granularize(corpus, corpus_source_type, granularity)
-        windowed_granularized_corpus = self.windowize(granularized_corpus, window_size)
-        return windowed_granularized_corpus
-
-    def get_window_sized_processed_corpuses(self, corpus: str, corpus_source_type: str, granularity: str,
-                                            window_sizes: List[int]) -> List[dict]:
-        window_sized_processed_corpus = []
+        processed_documents_with_many_window = []
         for window_size in window_sizes:
-            processed_corpus = pre_processor.process(corpus, corpus_source_type, granularity, window_size)
+            windowed_corpus: List[Tuple[str, ...]] = self.windowize(extracted_corpus, window_size)
+            for index_window, content_window in enumerate(windowed_corpus):
+                document: Document = Document(
+                    content=self.degranularize(content_window, granularity),
+                    meta={"index_window": index_window, "window_size": window_size}
+                )
+                processed_documents_with_many_window.append(document)
 
-            window_sized_pre_processed_corpus = {
-                "window_size": window_size,
-                "processed_corpus": processed_corpus
-            }
-
-            window_sized_processed_corpus.append(window_sized_pre_processed_corpus)
-
-        return window_sized_processed_corpus
+        return processed_documents_with_many_window
 
 
-pre_processor = PreProcessor()
+document_processor = DocumentProcessor()

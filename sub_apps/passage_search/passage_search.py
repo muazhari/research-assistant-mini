@@ -12,33 +12,18 @@ from models.passage_search_request import PassageSearchRequest
 from models.passage_search_response import PassageSearchResponse
 from sub_apps.passage_search.ranker_model import ranker_model
 from sub_apps.passage_search.retriever_model import retriever_model
-from utilities.pre_processor import pre_processor
+from utilities.document_processor import document_processor
 
 
 class PassageSearch:
 
     def get_window_sized_documents(self, passage_search_request: PassageSearchRequest) -> List[Document]:
-        window_sized_processed_corpuses: List[dict] = pre_processor.get_window_sized_processed_corpuses(
+        window_sized_documents: List[Document] = document_processor.process(
             corpus=passage_search_request.corpus,
             corpus_source_type=passage_search_request.corpus_source_type,
             granularity=passage_search_request.granularity,
             window_sizes=list(map(int, passage_search_request.window_sizes.split(" ")))
         )
-
-        window_sized_documents: List[Document] = []
-
-        for window_sized_processed_corpus in window_sized_processed_corpuses:
-            for index_window, window in enumerate(window_sized_processed_corpus["processed_corpus"]):
-                window_sized_document = Document(
-                    content=pre_processor.degranularize(
-                        windowed_corpus=window,
-                        granularity_source=passage_search_request.granularity
-                    ),
-                    meta={"index_window": index_window,
-                          "window_size": window_sized_processed_corpus["window_size"]}
-                )
-
-                window_sized_documents.append(window_sized_document)
 
         return window_sized_documents
 

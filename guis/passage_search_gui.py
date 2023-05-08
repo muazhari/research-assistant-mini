@@ -12,10 +12,10 @@ from models.embedding_model import EmbeddingModel
 from models.passage_search_request import PassageSearchRequest
 from models.passage_search_response import PassageSearchResponse
 from sub_apps.passage_search.annotater import annotater
-from sub_apps.passage_search.document_conversion import document_conversion
 from sub_apps.passage_search.passage_search import passage_search
 from sub_apps.passage_search.search_statistics import search_statistics
-from utilities.pre_processor import pre_processor
+from utilities.document_conversion import document_conversion
+from utilities.document_processor import document_processor
 
 
 class PassageSearchGUI:
@@ -189,7 +189,7 @@ class PassageSearchGUI:
 
         self.passage_search_request.window_sizes = st.text_input(
             label='Enter a list of window sizes that seperated by a space.',
-            value='1 3 5'
+            value='1 2 3 4 5'
         )
 
         self.passage_search_request.retriever_top_k = st.number_input(
@@ -211,7 +211,7 @@ class PassageSearchGUI:
             )
 
             result_windowed_documents: list = passage_search_response.retrieval_result["documents"]
-            result_documents = pre_processor.granularize(
+            result_documents = document_processor.extract_corpus(
                 corpus=self.passage_search_request.corpus,
                 corpus_source_type=self.passage_search_request.corpus_source_type,
                 granularity=self.passage_search_request.granularity

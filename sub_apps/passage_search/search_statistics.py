@@ -1,8 +1,11 @@
+from typing import List, Dict
+
+
 class SearchStatistics:
-    def get_document_indexes_with_overlapped_scores(self, result_windowed_documents: list) -> dict[int, dict]:
+    def get_document_indexes_with_overlapped_scores(self, result_windowed_documents: List) -> Dict[int, Dict]:
         result_document_indexes_with_overlapped_scores: dict = {}
         for windowed_document in result_windowed_documents:
-            windowed_document_source_indexes: list[int] = [
+            windowed_document_source_indexes: List[int] = [
                 windowed_document.meta["index_window"] + i for i in range(windowed_document.meta["window_size"])]
 
             for windowed_document_source_index in windowed_document_source_indexes:
@@ -26,7 +29,7 @@ class SearchStatistics:
 
         return result_document_indexes_with_overlapped_scores
 
-    def get_selected_labels(self, document_indexes_with_overlapped_scores: dict[int, dict], top_k: float) -> list:
+    def get_selected_labels(self, document_indexes_with_overlapped_scores: Dict[int, Dict], top_k: float) -> List:
         items = document_indexes_with_overlapped_scores.items()
         selected_labels = []
         max_selection = top_k
@@ -40,8 +43,8 @@ class SearchStatistics:
 
         return selected_labels
 
-    def get_selected_documents(self, document_indexes_with_overlapped_scores: dict[int, dict], top_k: float,
-                               source_documents: list[str]) -> list[str]:
+    def get_selected_documents(self, document_indexes_with_overlapped_scores: Dict[int, Dict], top_k: float,
+                               source_documents: List[str]) -> List[str]:
         items = document_indexes_with_overlapped_scores.items()
         selected_documents = []
         max_selection = top_k
