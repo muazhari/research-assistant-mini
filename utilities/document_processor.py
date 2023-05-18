@@ -4,6 +4,8 @@ import more_itertools
 from haystack import Document
 from txtai.pipeline import Segmentation, Textractor
 
+from utilities import locker
+
 
 class DocumentProcessor:
 
@@ -22,6 +24,7 @@ class DocumentProcessor:
 
         return granularized_corpus
 
+    @locker.wait_lock
     def textract(self, corpus: str, granularity: str) -> List[str]:
         granularized_corpus: List[str] = []
         if granularity == "word":

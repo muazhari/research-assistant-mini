@@ -4,6 +4,7 @@ import pdfkit
 from pdfrw import PdfReader, PdfWriter
 
 from models.passage_search_request import PassageSearchRequest
+from utilities import locker
 
 
 class DocumentConversion:
@@ -37,6 +38,7 @@ class DocumentConversion:
 
         return output_file_path
 
+    @locker.wait_lock
     def corpus_to_pdf(self, passage_search_request: PassageSearchRequest, output_file_path: Path) -> Path:
         if passage_search_request.corpus_source_type == "text":
             result_output_file_path = self.text_to_pdf(
