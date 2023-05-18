@@ -75,7 +75,6 @@ class PassageSearch:
 
         return retriever
 
-    @locker.wait_lock
     def get_sparse_retriever(self, passage_search_request: PassageSearchRequest,
                              documents: List[Document]) -> BaseRetriever:
         document_store_index_hash: str = self.get_document_store_index_hash(
