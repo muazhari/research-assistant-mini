@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from typing import List
 
 from haystack import Pipeline
-from haystack.document_stores import FAISSDocumentStore, InMemoryDocumentStore
+from haystack.document_stores import FAISSDocumentStore, InMemoryDocumentStore, BaseDocumentStore
 from haystack.nodes import BaseRetriever, JoinDocuments, BaseRanker
 from haystack.schema import Document
 
@@ -16,6 +16,10 @@ from utilities.document_processor import document_processor
 
 
 class PassageSearch:
+
+    def __init__(self):
+        self.dense_document_store_instance_caches: dict[str, BaseDocumentStore] = {}
+        self.sparse_document_store_instance_caches: dict[str, BaseDocumentStore] = {}
 
     def get_window_sized_documents(self, passage_search_request: PassageSearchRequest) -> List[Document]:
         window_sized_documents: List[Document] = document_processor.process(
@@ -41,34 +45,45 @@ class PassageSearch:
         document_store_index_hash: str = self.get_document_store_index_hash(
             passage_search_request=passage_search_request
         )
-        faiss_index_path: str = f"document_store/faiss_index_{document_store_index_hash}"
-        faiss_config_path: str = f"document_store/faiss_config_{document_store_index_hash}"
+        document_store = self.dense_document_store_instance_caches.get(document_store_index_hash, None)
 
-        if all(map(os.path.exists, [faiss_index_path, faiss_config_path])):
-            document_store: FAISSDocumentStore = FAISSDocumentStore.load(
-                index_path=faiss_index_path,
-                config_path=faiss_config_path,
-            )
-            retriever: BaseRetriever = retriever_model.get_dense_retriever(
-                document_store=document_store,
-                passage_search_request=passage_search_request,
-            )
+        if document_store is None:
+            faiss_index_path: str = f"document_store/faiss_index_{document_store_index_hash}"
+            faiss_config_path: str = f"document_store/faiss_config_{document_store_index_hash}"
+
+            if all(map(os.path.exists, [faiss_index_path, faiss_config_path])):
+                document_store: FAISSDocumentStore = FAISSDocumentStore.load(
+                    index_path=faiss_index_path,
+                    config_path=faiss_config_path,
+                )
+                retriever: BaseRetriever = retriever_model.get_dense_retriever(
+                    document_store=document_store,
+                    passage_search_request=passage_search_request,
+                )
+            else:
+                document_store: FAISSDocumentStore = FAISSDocumentStore(
+                    sql_url="sqlite:///document_store/document_store.db",
+                    index=document_store_index_hash,
+                    embedding_dim=passage_search_request.embedding_dimension,
+                    return_embedding=True,
+                    similarity=passage_search_request.similarity_function,
+                    duplicate_documents="skip",
+                )
+
+                retriever: BaseRetriever = retriever_model.get_dense_retriever(
+                    document_store=document_store,
+                    passage_search_request=passage_search_request,
+                )
+                document_store.write_documents(documents)
+                document_store.update_embeddings(retriever)
+                document_store.save(faiss_index_path, faiss_config_path)
+
+            self.dense_document_store_instance_caches[document_store_index_hash] = document_store
         else:
-            document_store: FAISSDocumentStore = FAISSDocumentStore(
-                sql_url="sqlite:///document_store/document_store.db",
-                index=document_store_index_hash,
-                embedding_dim=passage_search_request.embedding_dimension,
-                return_embedding=True,
-                similarity=passage_search_request.similarity_function,
-                duplicate_documents="skip",
-            )
             retriever: BaseRetriever = retriever_model.get_dense_retriever(
                 document_store=document_store,
                 passage_search_request=passage_search_request,
             )
-            document_store.write_documents(documents)
-            document_store.update_embeddings(retriever)
-            document_store.save(faiss_index_path, faiss_config_path)
 
         return retriever
 
@@ -77,20 +92,27 @@ class PassageSearch:
         document_store_index_hash: str = self.get_document_store_index_hash(
             passage_search_request=passage_search_request
         )
-
-        document_store: InMemoryDocumentStore = InMemoryDocumentStore(
-            index=document_store_index_hash,
-            embedding_dim=passage_search_request.embedding_dimension,
-            return_embedding=True,
-            similarity=passage_search_request.similarity_function,
-            duplicate_documents="skip",
-            use_bm25=True
-        )
-        retriever: BaseRetriever = retriever_model.get_sparse_retriever(
-            document_store=document_store,
-            passage_search_request=passage_search_request,
-        )
-        document_store.write_documents(documents)
+        document_store: BaseDocumentStore = self.sparse_document_store_instance_caches.get(document_store_index_hash,
+                                                                                           None)
+        if document_store is None:
+            document_store: InMemoryDocumentStore = InMemoryDocumentStore(
+                index=document_store_index_hash,
+                embedding_dim=passage_search_request.embedding_dimension,
+                return_embedding=True,
+                similarity=passage_search_request.similarity_function,
+                duplicate_documents="skip",
+                use_bm25=True
+            )
+            retriever: BaseRetriever = retriever_model.get_sparse_retriever(
+                document_store=document_store,
+                passage_search_request=passage_search_request,
+            )
+            document_store.write_documents(documents)
+        else:
+            retriever: BaseRetriever = retriever_model.get_sparse_retriever(
+                document_store=document_store,
+                passage_search_request=passage_search_request,
+            )
 
         return retriever
 
