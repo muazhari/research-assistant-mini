@@ -60,6 +60,7 @@ class DocumentConversion:
 
         return result_output_file_path
 
+    @locker.wait_lock
     def split_pdf_page(self, start_page: int, end_page: int, input_file_path: Path, output_file_path: Path) -> Path:
         input_pdf_reader = PdfReader(input_file_path)
         output_pdf_writer = PdfWriter(output_file_path)
@@ -68,12 +69,14 @@ class DocumentConversion:
 
         return output_file_path
 
+    @locker.wait_lock
     def file_bytes_to_pdf(self, file_bytes: bytes, output_file_path: Path) -> Path:
         with open(output_file_path, "wb") as f:
             f.write(file_bytes)
 
         return output_file_path
 
+    @locker.wait_lock
     def get_pdf_page_length(self, input_file_path: Path) -> int:
         input_pdf_reader = PdfReader(input_file_path)
         pdf_page_length = len(input_pdf_reader.pages)
