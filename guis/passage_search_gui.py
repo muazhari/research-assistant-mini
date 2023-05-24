@@ -140,7 +140,7 @@ class PassageSearchGUI:
             if None not in [uploaded_file]:
                 uploaded_file_hash = hashlib.md5(
                     uploaded_file.getbuffer()).hexdigest()
-                uploaded_file_name = "{}.pdf".format(uploaded_file_hash)
+                uploaded_file_name = f"{uploaded_file_hash}.pdf"
                 uploaded_file_path = self.STREAMLIT_STATIC_PATH / uploaded_file_name
                 self.passage_search_request.corpus = str(
                     document_conversion.file_bytes_to_pdf(uploaded_file.getbuffer(), uploaded_file_path))

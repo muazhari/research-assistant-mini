@@ -1,16 +1,14 @@
 import threading
 from functools import wraps
-from time import sleep
 
-lock = threading.Lock()
+locks = {}
 
 
 def wait_lock(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        while lock.locked():
-            sleep(0.001)
-        with lock:
+        locks[func.__name__] = locks.get(func.__name__, threading.Lock())
+        with locks[func.__name__]:
             result = func(*args, **kwargs)
         return result
 
